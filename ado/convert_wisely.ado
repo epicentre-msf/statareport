@@ -1,44 +1,81 @@
+/*
+Convert variables to string while keeping user-friendly headers.
 
-**# convert wisely the data to string characters.
+This helper is primarily used before exporting tables. It converts value
+labelled variables to their labelled string, rounds numerics, and preserves a
+useful note for each column so downstream code (e.g. kable) can render the
+right headers.
+
+Options
+-------
+- round(): numeric rounding increment. Defaults to 0.01 (two decimals).
+- usevarnames: force column notes to use the variable name.
+- usevarlabels: force column notes to use the variable label when available.
+
+Notes
+-----
+- The original variables are replaced with string versions; run on temporary
+  data if the numerics are still needed later in the pipeline.
+*/
+
 capture program drop convert_wisely
 program convert_wisely
-	syntax varlist [, ROUnd( real 0.01) usevarnames]
-	foreach v of varlist `varlist' {
-  	tempvar factv
-    local savednote ``v'[note1]'
-	//remove all the notes including the notes != from 1 
-	// This will take in account usevarnames for strings.
-	quietly note drop `v'
-    if ("`savednote'" == "") | ("`usevarnames'" != "") {
-      	local savednote `v'
-    }
-    
-   //first the coded variables (factors are my target)
-	local lbl: value label `v'
-	if (!missing("`lbl'")){
-    decode `v', generate(`factv')
-		drop `v'
-		gen `v' = `factv'
-  }
-  else{
-    capture confirm numeric variable `v'
-    if (!_rc){
-      gen double `factv' = round(`v', `round')
-      quietly tostring `factv', replace force
-          drop `v'
-          gen `v' = `factv'
-    }
-    else{
-      // sure string variable, I want to keep the order in the data
-         gen `factv' = `v'
-         drop `v'
-         gen `v' = `factv'
-    }
-    
-  }
+    version 15
+    syntax varlist [, ROUnd(real 0.01) USEVARNames USEVARLabels]
 
-	//Numeric you can change the rounding parameter
+    foreach v of local varlist {
+        tempvar work tmpstr decoded
+        local header ""
+        local varlabel : variable label `v'
 
-    note `v': `savednote'
-	}
+        local header ``v'[note1]'"
+        quietly note drop `v'
+
+        if ("`usevarlabels'" != "") {
+            local header : variable label `v'
+        }
+
+        if ("`header'" == "" & "`usevarnames'" != "") {
+            local header `v'
+        }
+
+        if ("`header'" == "") {
+            local header : variable label `v'
+        }
+
+        if ("`header'" == "") {
+            local header `v'
+        }
+
+        local lbl : value label `v'
+        if ("`lbl'" != "") {
+            decode `v', generate(`decoded')
+            drop `v'
+            rename `decoded' `v'
+        }
+        else {
+            capture confirm numeric variable `v'
+            if (!_rc) {
+                gen double `work' = `v'
+                quietly replace `work' = round(`work', `round')
+                tostring `work', generate(`tmpstr') format("%18.0g") force
+                drop `v' `work'
+                rename `tmpstr' `v'
+            }
+            else {
+                gen strL `tmpstr' = `v'
+                drop `v'
+                rename `tmpstr' `v'
+            }
+        }
+
+        quietly replace `v' = "" if `v' == "."
+        format `v' %-s
+
+        if ("`varlabel'" != "") {
+            label variable `v' "`varlabel'"
+        }
+
+        note `v': `"`header''"
+    }
 end

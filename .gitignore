@@ -47,3 +47,16 @@ luac.out
 # All those folders:
 Fexi
 logs
+
+# Local folders
+.local/
+
+# AI agents
+.claude/
+.stata-prog/
+
+# Others
+.DS_Store
+
+# source files serving as basis
+source/

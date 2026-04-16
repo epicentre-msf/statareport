@@ -1,198 +1,123 @@
-//program to convert a data in memory to a md table, preferably pandoc
+// program to convert data in memory to a Markdown grid table with optional multiline cells
 
 /*
-output: the output file 
+output: the output file
 caption: The table caption
 usevarnames: use the var names as heading
 usevarlabels: use the var labels as heading
 
-Default is to use the first note of the variable as heading and 
+Default is to use the first note of the variable as heading and
 then variable label and finally variable name if no notes/label found.
 
 nachar: A character for missings, default is "-"
 Round: (rounding for numerics)
 Space: The space to put at the end of each variable, normally you can ignore
+footnote: A paragraph appended after the table
+pipe: Use pipe table format instead of grid
 
-All the in - memory data is converted to strings, and I really don't border about converting the dates and other weird formats.
+All the in-memory data is converted to strings, and the program only cares
+about combining them into a Markdown grid table compatible with Pandoc.
 
 usage:
 
 sysuse auto, clear
 kable
 
-or 
+or
 
 sysuse auto, clear
 kable, usevarnames
 
-or 
+or
 
 sysuse auto, clear
 kable, out("temp.md") caption("Auto table")
-
-
-The code can be largely improved!
 */
-
 
 capture program drop kable
 program kable
-	version 15
-	//parameters are the file, the space to input
-	syntax [, SPAce(numlist>0 integer) OUTput(string) ROUnd(real 0.01) CAPtion(string) USEVARNames USEVARLabels nachar(string)]
-  
-  
-	//Number of variables
-	if (_N == 0) {
-		if ("`output'" != ""){
-    	writenone "`output'" "`caption'"
+    version 15
+    syntax [, SPAce(numlist>0 integer) OUTput(string) ROUnd(real 0.01) CAPtion(string) USEVARNames USEVARLabels nachar(string) FOOTnote(string) PIPE]
+
+    local format "grid"
+    if ("`pipe'" != "") {
+        local format "pipe"
     }
-    else{
-    	display as error "Empty data"
-    	tempfile f
-      writenone "`f'" "`caption'"
-      read_file "`f'"
-    }
-	}
-  else{
-  	tempfile savedtable 
-    quietly save "`savedtable'"
-  	quietly ds
-    local allvars `r(varlist)'
-    convert_wisely `allvars', round(`round') `usevarnames' `usevarlabels'
-    //ncol is the total number of variables
-    local ncol : word count `allvars'
-    if ("`nachar'" == "") {
-      local nachar = "-"
-    }
-    //space is the space length for each of the column. need to update in near future
-    local nval : word count `space'
-    // Managing the default behaviour for the space by aligning the columns to maximum length
-    if ("`space'" == ""){
-      foreach v of local allvars{
-          *First keep the length of the note
-        local notel = "``v'[note1]'"
-        local notel = ulength("`notel'")
-        local typel: type `v'
-        local typel = regexr("`typel'", "str", "")
-        *now the space
-        if (`typel' > `notel'){
-          local space = "`space' " + "`typel'"
+
+    //Number of variables
+    if (_N == 0) {
+        if ("`output'" != ""){
+            writenone "`output'" "`caption'" `"`footnote'"'
         }
         else{
-          local space = "`space' " + "`notel'"
+            display as error "Empty data"
+            tempfile f
+            writenone "`f'" "`caption'" `"`footnote'"'
+            read_file "`f'"
         }
-      }
-      local nval = `ncol'
+        exit
     }
-    else{
-      if (`nval' == 1){
-        local space: display _dup(`ncol') "`space' "
-      }
-    }
-    
-    //length greather than one: check the length with the corresponding data
-    if (`ncol' != `nval' & `nval' != 1){
-      display as error "Aborting, :( -- Number of space (`nval') != Number of vars in memory (`ncol')--"
-      exit 3
+
+    tempfile savedtable
+    quietly save "`savedtable'"
+    quietly ds
+    local allvars `r(varlist)'
+    convert_wisely `allvars', round(`round') `usevarnames' `usevarlabels'
+
+    local ncol : word count `allvars'
+    if ("`nachar'" == "") {
+        local nachar = "-"
     }
 
     tokenize "`allvars'"
     forvalues i=1/`ncol'{
-      local allvars_`i' "``i''"
+        local v ``i''
+        local header = trim("``v'[note1]'")
+        local k2_head_`i' `"`header'"'
     }
-    tokenize "`space'"
-    forvalues i = 1/`ncol'{
-      local space_`i' "``i''"
-    }
-    forvalues i = 1/`ncol'{
-      add_data_space `allvars_`i'' `space_`i'' "`nachar'"
-    }
+
     if ("`output'" != ""){
-      write_data "`output'" "`space'" "`caption'"
+        local outfile "`output'"
     }
     else{
-      // print on the console, write on a file and read the file to
-      // avoid depending on the width of the console.
-      tempfile f
-      tempname myfile
-      write_data "`f'" "`space'" "`caption'" "`footnote'"
-      read_file "`f'"
+        tempfile outfile
+        local outfile "`outfile'"
     }
+
+    local k2_output   `"`outfile'"'
+    local k2_caption  `"`caption'"'
+    local k2_footnote `"`footnote'"'
+    local k2_nachar   `"`nachar'"'
+    local k2_space    "`space'"
+    local k2_varlist  "`allvars'"
+    local k2_ncol     "`ncol'"
+    local k2_format   "`format'"
+
+    mata: kable_render()
+
+    if ("`output'" == ""){
+        read_file "`outfile'"
+    }
+
     use "`savedtable'", clear
-  }
-  
 end
 
-
-**# A little program to read a file 
 capture program drop read_file
-program read_file 
+program read_file
   args f
   tempname myfile
   file open `myfile' using "`f'", read
-		file read `myfile' line
-		while (r(eof) == 0) {
-		  display as text `"`line'"'
-			file read `myfile' line
-		}
+        file read `myfile' line
+        while (r(eof) == 0) {
+          display as text `"`line'"'
+          file read `myfile' line
+        }
   file close `myfile'
 end
 
-
-**# convert wisely the data to string characters.
-capture program drop convert_wisely
-program convert_wisely
-	syntax varlist [, ROUnd( real 0.01) usevarnames usevarlabels]
-	foreach v of varlist `varlist' {
-  	tempvar factv
-    local savednote ``v'[note1]'
-	//remove all the notes including the notes != from 1 
-	// This will take in account usevarnames for strings.
-	quietly note drop `v'
-    if ("`usevarlabels'" == "") & ("`usevarnames'" != ""){
-      local savednote `v'
-    }
-    else if ("`savednote'" == "") | ("`usevarlabels'" != ""){
-    	local savednote : variable label `v'
-    }
-    
-    if ("`savednote'" == "") {
-    	// Default is to use variable name if no notes and no label are found
-    	local savednote `v'
-    }
-    
-   //first the coded variables (factors are my target)
-	local lbl: value label `v'
-	if (!missing("`lbl'")){
-    decode `v', generate(`factv')
-		drop `v'
-		gen `v' = `factv'
-  }
-  else{
-    capture confirm numeric variable `v'
-    if (!_rc){
-    	//Numeric you can change the rounding parameter
-      gen double `factv' = round(`v', `round')
-      quietly tostring `factv', replace force
-          drop `v'
-          gen `v' = `factv'
-    }
-    else{
-      // sure string variable, I want to keep the order in the data
-         gen `factv' = `v'
-         drop `v'
-         gen `v' = `factv'
-    }
-  }
-    note `v': `savednote'
-	}
-end
-
-**# Write none to a file using a custom pandoc style
 capture program drop writenone
 program writenone
-  args f  caption // just the file to write on and the caption of the table
+  args f caption footnote
   tempname myfile
   capture file close `myfile'
   quietly file open `myfile' using "`f'", write replace
@@ -201,125 +126,381 @@ program writenone
   file write `myfile' `":::{custom-style="Nonestyle"}"' _n
   file write `myfile' "None" _n
   file write `myfile' ":::"_n
+  if (`"`footnote'"' != "") {
+      file write `myfile' _n
+      file write `myfile' `"`footnote'"' _n
+  }
   file write `myfile' _n
   file close `myfile'
-end 
-
-**# Write the data to a file
-capture program drop write_data
-program write_data
-	args f space caption allvars footnote
-	tempname myfile
-	capture file close `myfile'
-	quietly file open `myfile' using "`f'", write replace
-	file write `myfile' _n
-	file write `myfile' "Table: `caption'"
-	file write `myfile' _n
-	file write `myfile' _n
-	*add heading and the data to myfile
-	add_heading `myfile' "`space'"
-	add_data `myfile'	"`space'"
-	file write `myfile' _n
-	file write `myfile' "`footnote'"
-	quietly file close `myfile'
 end
 
-**#  add space to data
-capture program drop add_data_space
-program add_data_space
-	args vari max nachar
-	tempvar lvar
-	local mm = `max' + 1
-	quietly replace `vari' = "`nachar'" if `vari' == "."
-	gen `lvar' = ulength(`vari')
-	summarize `lvar', meanonly
-	if (`r(max)' > `mm'){
-		display as error "Increase the space for variable `vari', too small"
-	}
-	local pad: display _dup(`mm') " "
-	quietly replace `vari' = `vari' + substr("`pad'", 1, `mm' - `lvar')
-end
+capture mata: mata drop kable_render()
+capture mata: mata drop k2_normalize_matrix()
+capture mata: mata drop k2_split_lines()
+capture mata: mata drop k2_maxwidth()
+capture mata: mata drop k2_pad()
+capture mata: mata drop k2_repeat()
+capture mata: mata drop k2_make_separator()
+capture mata: mata drop k2_make_alignment()
+capture mata: mata drop k2_make_pipe_alignment()
+capture mata: mata drop k2_render_row()
+capture mata: mata drop k2_pipe_cell()
+capture mata: mata drop k2_render_pipe_row()
 
-**# --- ADD HEADINGS TO THE FILE
-capture program drop add_heading
-program add_heading
-	args myfile space
-	quietly ds
-	local allvars `r(varlist)'
-	local ncol: word count `r(varlist)'
+mata:
 
-	tokenize "`space'"
-	forvalues i=1/`ncol'{
-	  local space_`i' ``i''
-	}
-	tokenize "`allvars'"
-	forvalues i=1/`ncol'{
-	  local v_`i' ``i''
-	}
-	//writing the first line
-	add_separator `myfile' "`space'"
-	file write `myfile' _n
-	file write `myfile' "|"
-	//add the space and write to the file
-	forvalues i = 1/`ncol'{
-		local mylab "``v_`i''[note1]'"
-		local mylabl = ulength("`mylab'")
-		local mm = `space_`i'' + 1
-		if (`mylabl' > `mm'){
-			display as error "Increase the space for var `v_`i''; too small"
-		}
-		local pad: display _dup(`mm') " "
-		local mylab = trim("`mylab'") + substr("`pad'", 1, `mm' - `mylabl')
-		file write `myfile' "`mylab'"
-		file write `myfile' "|"
-	}
+string matrix function k2_normalize_matrix(string matrix X)
+{
+    real scalar R, C, r, c;
+    string scalar newline, carriage, backslash, s;
 
-	file write `myfile' _n
-	local first_column : display _dup(`space_1') "="
-	local first_column = "+" + ":" + "`first_column'"
-	file write `myfile' "`first_column'"
-	file write `myfile' "+"
+    R = rows(X);
+    C = cols(X);
+    newline = char(10);
+    carriage = char(13);
+    backslash = char(92);
 
-	forvalues i=2/`ncol'{
-	  local col: display _dup(`space_`i'') "="
-		local col = "`col'" + ":" + "+"
-		file write `myfile' "`col'"
-	}
-	file write `myfile' _n
-end
+    for (r = 1; r <= R; r++) {
+        for (c = 1; c <= C; c++) {
+            s = X[r,c];
+            if (ustrlen(s) == 0) {
+                continue;
+            }
+            s = subinstr(s, carriage + newline, newline, .);
+            s = subinstr(s, carriage, newline, .);
+            s = subinstr(s, backslash + "r", newline, .);
+            s = subinstr(s, backslash + "n", newline, .);
+            X[r,c] = s;
+        }
+    }
+    return(X);
+}
 
-**# convert data to the md table
-capture program drop add_data
-program add_data
-  args myfile  space
-  tempfile mytxt
-  tempname myt
-  quietly export delimited using "`mytxt'", delimiter("|") novar nolabel
-  file open `myt' using "`mytxt'", read
-  file read `myt' line
-  while r(eof) == 0{
-   file write `myfile' "|"
-	 file write `myfile' "`line'"
-	 file write `myfile' "|"
-	 file write `myfile' _n
-	 add_separator `myfile' "`space'"
-	 file write `myfile' _n
-	 file read `myt' line
-  }
-end
+string rowvector function k2_split_lines(string scalar s)
+{
+    string scalar newline;
+    real scalar start, pos;
+    string rowvector parts;
 
-//--- add the separator for a line (grid tables)
-capture program drop add_separator
-program add_separator
-	args myfile space
-	quietly ds
-  local ncol: word count `r(varlist)'
-  tokenize "`space'"
-  file write `myfile' "+"
-  forvalues i = 1/`ncol'{
- 	  local nb = ``i'' + 1
-		local col: display _dup(`nb') "-"
-		local col = "`col'" + "+"
-		file write `myfile' "`col'"
-	}
+    newline = char(10);
+    if (ustrlen(s) == 0) {
+        return("");
+    }
+
+    start = 1;
+    parts = J(1, 0, "");
+    pos = ustrpos(s, newline, start);
+    while (pos > 0) {
+        parts = parts, usubstr(s, start, pos - start);
+        start = pos + 1;
+        pos = ustrpos(s, newline, start);
+    }
+    parts = parts, usubstr(s, start, .);
+    if (cols(parts) == 0) {
+        parts = parts, s;
+    }
+    return(parts);
+}
+
+real scalar function k2_maxwidth(string scalar s)
+{
+    string rowvector parts;
+    real scalar maxw, i, w;
+
+    parts = k2_split_lines(s);
+    maxw = 0;
+    for (i = 1; i <= cols(parts); i++) {
+        w = ustrlen(ustrtrim(parts[i]));
+        if (w > maxw) maxw = w;
+    }
+    return(maxw);
+}
+
+string scalar function k2_repeat(string scalar unit, real scalar times)
+{
+    real scalar i;
+    string scalar out;
+
+    if (times <= 0) {
+        return("");
+    }
+    out = "";
+    for (i = 1; i <= times; i++) {
+        out = out + unit;
+    }
+    return(out);
+}
+
+string scalar function k2_pad(string scalar s, real scalar width)
+{
+    string scalar trimmed;
+    real scalar len, target;
+
+    trimmed = ustrtrim(s);
+    len = ustrlen(trimmed);
+    target = ceil(width);
+    if (len >= target) {
+        return(trimmed);
+    }
+    return(trimmed + k2_repeat(" ", target - len));
+}
+
+string scalar function k2_make_separator(real rowvector widths)
+{
+    string scalar sep;
+    real scalar i, w;
+
+    sep = "+";
+    for (i = 1; i <= cols(widths); i++) {
+        w = ceil(widths[i]);
+        sep = sep + k2_repeat("-", w + 2) + "+";
+    }
+    return(sep);
+}
+
+string scalar function k2_make_alignment(real rowvector widths)
+{
+    string scalar line;
+    real scalar i, w;
+
+    if (cols(widths) == 0) {
+        return("+");
+    }
+
+    w = ceil(widths[1]);
+    line = "+:" + k2_repeat("=", w + 1) + "+";
+    for (i = 2; i <= cols(widths); i++) {
+        w = ceil(widths[i]);
+        line = line + k2_repeat("=", w + 1) + ":" + "+";
+    }
+    return(line);
+}
+
+string scalar function k2_make_pipe_alignment(real rowvector widths)
+{
+    string scalar line;
+    real scalar i, w;
+
+    line = "|";
+    for (i = 1; i <= cols(widths); i++) {
+        w = ceil(widths[i]);
+        if (w < 3) w = 3;
+        if (i == 1) {
+            line = line + ":" + k2_repeat("-", w) + "|";
+        }
+        else {
+            line = line + k2_repeat("-", w) + ":|";
+        }
+    }
+    return(line);
+}
+
+string colvector function k2_render_row(string rowvector cells, real rowvector widths)
+{
+    real scalar ncol, c, maxh, r, target, total;
+    string colvector rendered;
+    string rowvector lines;
+    string scalar rowtxt, part;
+
+    ncol = cols(cells);
+    maxh = 0;
+
+    for (c = 1; c <= ncol; c++) {
+        lines = k2_split_lines(cells[c]);
+        total = cols(lines);
+        if (total > maxh) {
+            maxh = total;
+        }
+    }
+    if (maxh < 1) {
+        maxh = 1;
+    }
+
+    rendered = J(maxh, 1, "");
+    for (r = 1; r <= maxh; r++) {
+        rowtxt = "|";
+        for (c = 1; c <= ncol; c++) {
+            lines = k2_split_lines(cells[c]);
+            total = cols(lines);
+            part = "";
+            if (r <= total) {
+                part = lines[r];
+            }
+            target = ceil(widths[c]);
+            rowtxt = rowtxt + " " + k2_pad(part, target) + " |";
+        }
+        rendered[r] = rowtxt;
+    }
+
+    return(rendered);
+}
+
+string scalar function k2_pipe_cell(string scalar s)
+{
+    string scalar t;
+    t = s;
+    if (ustrlen(t) == 0) {
+        return(t);
+    }
+    t = subinstr(t, char(10), "<br>", .);
+    t = subinstr(t, "|", "&#124;", .);
+    return(t);
+}
+
+string scalar function k2_render_pipe_row(string rowvector cells, real rowvector widths)
+{
+    real scalar ncol, c, target;
+    string scalar rowtxt, part;
+
+    ncol = cols(cells);
+    rowtxt = "|";
+    for (c = 1; c <= ncol; c++) {
+        part = k2_pipe_cell(cells[c]);
+        target = ceil(widths[c]);
+        rowtxt = rowtxt + " " + k2_pad(part, target) + " |";
+    }
+    return(rowtxt);
+}
+
+void function kable_render()
+{
+    string scalar outfile, caption, footnote, nachar, spacelist, format, macro, h, sep, align, rowstr, t, suffix;
+    string rowvector varnames, headers, parts_row, row;
+    string matrix data, header_m;
+    string colvector lines, hdr, rendered;
+    real scalar ncol, nobs, c, r, mn, val, nparts, fh, nlines, i;
+    real rowvector widths;
+
+    outfile = st_local("k2_output");
+    caption = st_local("k2_caption");
+    footnote = st_local("k2_footnote");
+    nachar = st_local("k2_nachar");
+    if (nachar == "") nachar = "-";
+    spacelist = st_local("k2_space");
+    format = st_local("k2_format");
+    if (format == "") format = "grid";
+    varnames = tokens(st_local("k2_varlist"));
+    ncol = cols(varnames);
+    nobs = st_nobs();
+
+    headers = J(1, ncol, "");
+    for (c = 1; c <= ncol; c++) {
+        macro = sprintf("k2_head_%g", c);
+        h = st_local(macro);
+        if (h == "") h = varnames[c];
+        headers[c] = h;
+    }
+
+    if (nobs == 0) {
+        data = J(0, ncol, "");
+    }
+    else {
+        data = st_sdata(., varnames);
+    }
+
+    header_m = k2_normalize_matrix(headers);
+    headers = header_m[1,.];
+    data = k2_normalize_matrix(data);
+
+    for (r = 1; r <= rows(data); r++) {
+        for (c = 1; c <= ncol; c++) {
+            rowstr = data[r,c];
+            t = ustrtrim(rowstr);
+            if (ustrlen(t) == 0) {
+                data[r,c] = nachar;
+            }
+            else if (t == ".") {
+                data[r,c] = nachar;
+            }
+            else if (usubstr(t, 1, 1) == "." & ustrlen(t) == 2) {
+                suffix = usubstr(t, 2, 1);
+                if ((suffix >= "a" & suffix <= "z") | (suffix >= "A" & suffix <= "Z")) {
+                    data[r,c] = nachar;
+                }
+            }
+        }
+    }
+
+    if (spacelist == "") {
+        widths = J(1, ncol, 0);
+        for (c = 1; c <= ncol; c++) {
+            val = k2_maxwidth(headers[c]);
+            if (val > widths[c]) widths[c] = val;
+        }
+        for (r = 1; r <= rows(data); r++) {
+            for (c = 1; c <= ncol; c++) {
+                val = k2_maxwidth(data[r,c]);
+                if (val > widths[c]) widths[c] = val;
+            }
+        }
+        mn = k2_maxwidth(nachar);
+        for (c = 1; c <= ncol; c++) {
+            if (widths[c] < mn) widths[c] = mn;
+            if (widths[c] < 1) widths[c] = 1;
+        }
+    }
+    else {
+        parts_row = tokens(spacelist);
+        nparts = cols(parts_row);
+        if (nparts == 1) {
+            val = strtoreal(parts_row[1]);
+            widths = J(1, ncol, val);
+        }
+        else if (nparts == ncol) {
+            widths = strtoreal(parts_row);
+        }
+        else {
+            errprintf("Aborting, :( -- Number of space (%g) != Number of vars in memory (%g)--\n", nparts, ncol);
+            error(3);
+        }
+        for (c = 1; c <= ncol; c++) {
+            if (missing(widths[c]) || widths[c] <= 0) widths[c] = 1;
+        }
+    }
+
+    sep = k2_make_separator(widths);
+    align = k2_make_alignment(widths);
+
+    lines = J(0, 1, "");
+    lines = lines \ "";
+    lines = lines \ ("Table: " + caption);
+    lines = lines \ "";
+    lines = lines \ "";
+    if (format == "pipe") {
+        lines = lines \ k2_render_pipe_row(headers, widths);
+        lines = lines \ k2_make_pipe_alignment(widths);
+        for (r = 1; r <= rows(data); r++) {
+            row = data[r,.];
+            lines = lines \ k2_render_pipe_row(row, widths);
+        }
+    }
+    else {
+        lines = lines \ sep;
+
+        hdr = k2_render_row(headers, widths);
+        lines = lines \ hdr;
+        lines = lines \ align;
+
+        for (r = 1; r <= rows(data); r++) {
+            row = data[r,.];
+            rendered = k2_render_row(row, widths);
+            lines = lines \ rendered;
+            lines = lines \ sep;
+        }
+    }
+
+    lines = lines \ "";
+    lines = lines \ footnote;
+
+    if (fileexists(outfile)) {
+        unlink(outfile);
+    }
+    fh = fopen(outfile, "w");
+    nlines = rows(lines);
+    for (i = 1; i <= nlines; i++) {
+        fput(fh, lines[i]);
+    }
+    fclose(fh);
+}
+
 end

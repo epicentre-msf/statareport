@@ -1,0 +1,35 @@
+v 3
+d 'statareport': Custom analysis utilities for the TGL project
+d Author: Epicentre EpiDS
+d Requires: Stata 15 or newer
+d Distribution-Date: 17 Feb 2026
+f ado/statareport__apply_order.ado
+f ado/add_perc.ado
+f ado/compute_ci.ado
+f ado/compute_shift_graphs.ado
+f ado/convert_wisely.ado
+f ado/create_dyntex.ado
+f ado/generate_label_ids.ado
+f ado/statareport_setup_dirs.ado
+f ado/kable.ado
+f ado/kable_basic.ado
+f ado/knit.ado
+f ado/label_table.ado
+f ado/qual.ado
+f ado/quant.ado
+f ado/add_perc.sthlp
+f ado/compute_ci.sthlp
+f ado/compute_shift_graphs.sthlp
+f ado/convert_wisely.sthlp
+f ado/create_dyntex.sthlp
+f ado/generate_label_ids.sthlp
+f ado/kable.sthlp
+f ado/kable_basic.sthlp
+f ado/knit.sthlp
+f ado/label_table.sthlp
+f ado/qual.sthlp
+f ado/quant.sthlp
+f ado/statareport__apply_order.sthlp
+f ado/statareport_setup_dirs.sthlp
+f examples/run_basic_report.do
+f examples/data/sample_patients.csv

@@ -1,0 +1,5 @@
+v 3
+d 'statareport': Custom ados for reporting in stata
+d Maintainer: Epicentre EPIDS Team
+d This package bundles custom ados for analysis.
+p statareport
