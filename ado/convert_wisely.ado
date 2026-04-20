@@ -70,12 +70,11 @@ program convert_wisely
         }
 
         quietly replace `v' = "" if `v' == "."
-        format `v' %-s
 
         if ("`varlabel'" != "") {
             label variable `v' "`varlabel'"
         }
 
-        note `v': `"`header'"'
+        note `v': `header'
     }
 end

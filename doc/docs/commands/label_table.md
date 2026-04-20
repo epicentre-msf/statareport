@@ -43,6 +43,20 @@ the command keeps only `label` and `value*` variables, sorted by
 `label` and `value*` columns for downstream use by [`kable`](kable.md) or
 [`kable_basic`](kable_basic.md).
 
+### Ordering and hiding rows via `order`
+
+When the Excel sheet contains an `order` column:
+
+- rows are sorted by `order` (ascending)
+- rows whose `order` cell is **blank** (empty string or missing number)
+  are **dropped** from the final labelled table
+
+That second behavior is the supported way to hide a computed row from
+the report: clear its `order` cell in Excel and re-render. The
+underlying `quant` / `qual` output is untouched, so the analysis is
+still complete — the Excel sheet just controls what makes it into the
+published table.
+
 
 ## Options
 

@@ -79,6 +79,11 @@ nav:
     - Overview: workflow.md
     - Configuration (.StataEnviron): configuration.md
     - Rendering pipeline: rendering.md
+  - Tables:
+    - Overview: tables_overview.md
+    - Quantitative: tables_quant.md
+    - Qualitative: tables_qual.md
+    - Complex: tables_complex.md
   - Commands:
     - Overview: commands/index.md
     - Project scaffolding:

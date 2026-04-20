@@ -10,6 +10,14 @@ Options
 - value_name(): optional note propagated to all `value*` columns.
 - drop_value(): drop rows whose `value` matches the provided string (case
   sensitive after trimming).
+
+Row ordering & removal via the `order` column
+----------------------------------------------
+If the Excel sheet contains an `order` column, rows are sorted by it.
+Rows whose `order` cell is blank (empty string or missing number) are
+dropped from the final labelled table. This is the supported way to hide
+a computed row from the report without re-running `quant`/`qual`: clear
+the `order` cell in Excel and re-render.
 */
 
 capture program drop label_table
@@ -65,6 +73,16 @@ program label_table
 
     capture confirm variable order
     if (!_rc) {
+        // Blank `order` cells in the Excel sheet = drop the row from the
+        // final labelled table. This lets users hide rows from the report
+        // without changing the underlying quant/qual computation.
+        capture confirm numeric variable order
+        if (!_rc) {
+            quietly drop if missing(order)
+        }
+        else {
+            quietly drop if trim(order) == ""
+        }
         sort order
     }
     else {

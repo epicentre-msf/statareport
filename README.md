@@ -46,7 +46,7 @@ and subfolder variations.
 
 ---
 
-## From empty folder to `.docx` in 60 seconds
+## Getting started
 
 ```stata
 cd ~/scratch/my_trial

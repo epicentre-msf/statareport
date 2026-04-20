@@ -36,6 +36,12 @@ the command keeps only {cmd:label} and {cmd:value*} variables, sorted by
 {cmd:label} and {cmd:value*} columns for downstream use by {help kable} or
 {help kable_basic}.
 
+{pstd}When the Excel sheet includes an {cmd:order} column, rows whose
+{cmd:order} cell is blank (empty string or missing number) are dropped from
+the final labelled table.  This is the intended way to hide a computed row
+from the rendered report: clear its {cmd:order} cell in Excel and re-render;
+the underlying {help quant}/{help qual} output is untouched.
+
 {title:Options}
 {phang}{cmd:tab_file(}{it:string}{cmd:)} specifies the path to the Stata
 dataset that needs labelling.
