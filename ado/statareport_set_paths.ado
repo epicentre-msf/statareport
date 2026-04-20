@@ -96,6 +96,22 @@ program define statareport_set_paths, rclass
     if ("`graphopts'" != "") local _graphopts "`graphopts'"
 
     // -------------------------------------------------------------------
+    // Validate input files. Output files (dyntex, input, output) are
+    // created by the render pipeline so they are not checked here.
+    // -------------------------------------------------------------------
+    local _bad 0
+    foreach role in header reference defaults label graphopts {
+        local _p "`_`role''"
+        capture confirm file "`_p'"
+        if (_rc) {
+            display as error ///
+                "statareport_set_paths: `role' file not found: `_p'"
+            local _bad 1
+        }
+    }
+    if (`_bad') exit 601
+
+    // -------------------------------------------------------------------
     // Emit the globals.
     // -------------------------------------------------------------------
     global file_dyntex`gsuf'          "`_dyntex'"
@@ -124,14 +140,13 @@ program define statareport_set_paths, rclass
     if ("`quiet'" == "") {
         display as text "statareport_set_paths: " as result "`stem'" ///
             as text " (root: " as result "`root'" as text ")"
-        display as text "  globals set: " ///
-            as result "`$file_dyntex`gsuf''" _n ///
-            as text "               " as result "`$file_input`gsuf''" _n ///
-            as text "               " as result "`$file_header`gsuf''" _n ///
-            as text "               " as result "`$file_output`gsuf''" _n ///
-            as text "               " as result "`$file_reference`gsuf''" _n ///
-            as text "               " as result "`$file_default_options`gsuf''" _n ///
-            as text "               " as result "`$file_label`gsuf''" _n ///
-            as text "               " as result "`$file_graph_opts`gsuf''"
+        display as text "  $file_dyntex`gsuf'          = " as result "${file_dyntex`gsuf'}"
+        display as text "  $file_input`gsuf'           = " as result "${file_input`gsuf'}"
+        display as text "  $file_header`gsuf'          = " as result "${file_header`gsuf'}"
+        display as text "  $file_output`gsuf'          = " as result "${file_output`gsuf'}"
+        display as text "  $file_reference`gsuf'       = " as result "${file_reference`gsuf'}"
+        display as text "  $file_default_options`gsuf' = " as result "${file_default_options`gsuf'}"
+        display as text "  $file_label`gsuf'           = " as result "${file_label`gsuf'}"
+        display as text "  $file_graph_opts`gsuf'      = " as result "${file_graph_opts`gsuf'}"
     }
 end
