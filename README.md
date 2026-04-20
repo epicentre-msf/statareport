@@ -195,4 +195,4 @@ the full development loop, style guide, and release process.
 
 ## License
 
-MIT. © contributors.
+MIT.
