@@ -16,7 +16,9 @@
 `f:rom(path)`
 `m:arkers(patterns)`
 `force`
-`clear`]
+`clear`
+`nogl:obal`
+`gl:name(name)`]
 
 
 
@@ -82,6 +84,16 @@ pays a negligible search cost; the rest are free.
 
 > 
 `clear` drop the cache. Use when switching projects mid-session.
+
+> 
+`noglobal` suppress the `$dir_project` side-effect. By default
+`here` emits the root as `$dir_project` so downstream code can
+reference it with `$dir_project/...`.
+
+> 
+`glname(name)` emit the root under a different global name (e.g.
+`glname(project)` writes `$project` instead of
+`$dir_project`).
 
 
 

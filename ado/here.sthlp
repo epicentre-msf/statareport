@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 0.3.0  16apr2026}{...}
+{* *! version 0.4.0  20apr2026}{...}
 {title:Title}
 
 {p 4 4 2}
@@ -15,7 +15,9 @@
 {opt f:rom(path)}
 {opt m:arkers(patterns)}
 {opt force}
-{opt clear}]
+{opt clear}
+{opt nogl:obal}
+{opt gl:name(name)}]
 
 
 {title:Description}
@@ -75,6 +77,16 @@ pays a negligible search cost; the rest are free.
 
 {phang}
 {opt clear} drop the cache. Use when switching projects mid-session.
+
+{phang}
+{opt noglobal} suppress the {cmd:$dir_project} side-effect. By default
+{cmd:here} emits the root as {cmd:$dir_project} so downstream code can
+reference it with {cmd:$dir_project/...}.
+
+{phang}
+{opt glname(name)} emit the root under a different global name (e.g.
+{cmd:glname(project)} writes {cmd:$project} instead of
+{cmd:$dir_project}).
 
 
 {title:Stored results}

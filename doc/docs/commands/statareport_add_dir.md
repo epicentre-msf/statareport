@@ -51,6 +51,17 @@ Unlike [`statareport_add_data`](statareport_add_data.md), the default root for
 root -- directories in a statareport project are almost always children
 of the repo.
 
+A `path()` of `"."` (or `"./"`) resolves to the chosen
+root itself with no trailing slash, so you can register the project root
+as a global:
+
+> `. here`
+> `. statareport_add_dir, name(project) path(".")`
+
+sets `$dir_project` = `__here_root__`. (Since `here`
+already exports `$dir_project` by default you rarely need this, but
+it is the explicit form.)
+
 
 ## Examples
 

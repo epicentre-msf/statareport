@@ -1,19 +1,26 @@
-*! version 0.3.0  16apr2026
+*! version 0.4.0  20apr2026
 *! here.ado -- cd to project root. Portable relative paths, nothing more.
 *!
 *! First call:  walks up from c(pwd) to find a root marker, cd's there,
 *!              prints one initialization message.
 *! Later calls: cd's to the cached root silently.
 *! Cache:       Mata global __here_root__  (invisible to Stata globals).
+*! Convenience: by default also emits $dir_project = <root> so downstream
+*!              code can build paths like "$dir_project/local_datasets/x".
+*!              Pass `noglobal' to suppress, or `glname(name)' to use a
+*!              different global name.
 *!
 *! Usage:
 *!   here
 *!   use data/clean.dta, clear       // plain relative path, just works
+*!   here, noglobal                  // do not touch $dir_project
+*!   here, glname(root_dir)          // set $root_dir instead of $dir_project
 
 program define here, rclass
     version 14
 
-    syntax [, Levels(integer 5) From(string) Markers(string) Force Clear]
+    syntax [, Levels(integer 5) From(string) Markers(string) Force Clear ///
+        NOGLobal GLname(string)]
 
     // ------------------------------------------------------------------
     // clear: drop the cache and return
@@ -109,6 +116,14 @@ program define here, rclass
     if !`was_cached' {
         display as text "(here: " as result `"`root'"' ///
             as text "  [`found_marker'])"
+    }
+
+    // ------------------------------------------------------------------
+    // export $dir_project (or a user-chosen name) unless noglobal
+    // ------------------------------------------------------------------
+    if (`"`glname'"' == "") local glname "dir_project"
+    if ("`noglobal'" == "") {
+        global `glname' `"`root'"'
     }
 
     // ------------------------------------------------------------------

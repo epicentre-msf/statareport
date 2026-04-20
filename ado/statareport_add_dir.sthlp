@@ -44,6 +44,17 @@ Passing more than one aborts with rc 198.{p_end}
 root -- directories in a statareport project are almost always children
 of the repo.{p_end}
 
+{pstd}A {cmd:path()} of {cmd:"."} (or {cmd:"./"}) resolves to the chosen
+root itself with no trailing slash, so you can register the project root
+as a global:{p_end}
+
+{phang}{cmd:. here}{p_end}
+{phang}{cmd:. statareport_add_dir, name(project) path(".")}{p_end}
+
+{pstd}sets {cmd:$dir_project} = {cmd:__here_root__}. (Since {cmd:here}
+already exports {cmd:$dir_project} by default you rarely need this, but
+it is the explicit form.){p_end}
+
 {title:Examples}
 {pstd}A typical project-directory block:{p_end}
 {phang}{cmd:. here}{p_end}

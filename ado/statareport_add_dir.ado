@@ -88,9 +88,18 @@ program define statareport_add_dir, rclass
     }
 
     // Build the resolved path -----------------------------------------------
+    // A relative path equal to "." (or "./") means "the chosen root itself".
+    if (`"`raw_path'"' == "." | `"`raw_path'"' == "./") {
+        local raw_path ""
+    }
     local resolved `"`raw_path'"'
-    if (!`is_abs' & `"`chosen_root'"' != "") {
-        local resolved `"`chosen_root'/`raw_path'"'
+    if (!`is_abs') {
+        if (`"`raw_path'"' == "" & `"`chosen_root'"' != "") {
+            local resolved `"`chosen_root'"'
+        }
+        else if (`"`chosen_root'"' != "") {
+            local resolved `"`chosen_root'/`raw_path'"'
+        }
     }
 
     // Strip a trailing slash unless the path is just "/".
