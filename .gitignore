@@ -39,10 +39,13 @@ luac.out
 *.x86_64
 *.hex
 
-# Rmd and md files (I use some of them for documentation)
+# Rmd and ad-hoc documentation we don't want to ship.
+# Keep repo-root README.md / CHANGELOG.md and anything under docs/ trackable.
 *.Rmd
-*.R
-*.md
+*.preview.md
+!README.md
+!CHANGELOG.md
+
 
 # All those folders:
 Fexi
@@ -58,5 +61,9 @@ logs
 # Others
 .DS_Store
 
-# source files serving as basis
+# source/ holds the upstream ado files that the package in ado/ is derived
+# from. Keep it out of the install tarball, but remove this line if you want
+# to commit the sources alongside the package (recommended for reproducibility).
 source/
+.vscode/
+tools/

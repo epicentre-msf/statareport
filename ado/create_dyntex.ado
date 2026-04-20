@@ -41,7 +41,15 @@ program create_dyntex
         }
     }
 
-    quietly tostring *, replace
+    // Coerce every label-sheet column to string. tostring refuses already-string
+    // variables, so loop and skip those.
+    foreach col of varlist _all {
+        capture confirm string variable `col'
+        if (_rc) {
+            quietly tostring `col', replace force
+        }
+    }
+
     quietly replace InputID   = trim(InputID)
     quietly replace Include   = lower(trim(Include))
     quietly replace Section   = trim(Section)
@@ -82,8 +90,10 @@ program create_dyntex
         local caption    = trim("`caption'")
         local footnote   = trim("`footnote'")
         if ("`caption'" == "") local caption "`id'"
-        local caption_clean : subinstr local caption "\"", "\\\"", .
-        local footnote_clean : subinstr local footnote "\"", "\\\"", .
+        // Escape embedded double-quotes for safe inclusion in the DynTex output.
+        // Use subinstr() with char(34) to avoid fragile backslash-quote literals.
+        local caption_clean  = subinstr(`"`caption'"',  char(34), "\" + char(34), .)
+        local footnote_clean = subinstr(`"`footnote'"', char(34), "\" + char(34), .)
         local section    = Section[`row']
         local subsection = Subsection[`row']
         local display    = DisplayMode[`row']

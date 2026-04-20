@@ -29,11 +29,11 @@ numbering sequence begins.  The value must be non-negative.  If omitted the
 default is {cmd:1}.
 
 {title:Examples}
-{phang}{cmd:. generate_label_ids age sex weight}
+{phang}{cmd:. generate_label_ids age sex weight}{p_end}
 
-{phang}{cmd:. generate_label_ids value1 value2 value3, starting(10)}
+{phang}{cmd:. generate_label_ids value1 value2 value3, starting(10)}{p_end}
 
-{phang}{cmd:. ds value*}{break}{cmd:. generate_label_ids `r(varlist)', starting(100)}
+{phang}{cmd:. ds value*}{break}{cmd:. generate_label_ids `r(varlist)', starting(100)}{p_end}
 
 {title:Also see}
-{psee}{help label_table}, {help qual}, {help quant}
+{pstd}{help label_table}, {help qual}, {help quant}{p_end}

@@ -24,7 +24,7 @@ program define statareport_setup_dirs
         local root = substr("`root'", 1, strlen("`root'") - 1)
     }
 
-    local folders "input_md input_tables output_md output_tables output_figures output_word logs local_datasets"
+    local folders "do_files do_files/helpers programs input_md input_tables output_md output_tables output_tables/labelled_tables output_figures output_word logs local_datasets"
 
     foreach d of local folders {
         local target "`root'/`d'"

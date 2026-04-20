@@ -43,11 +43,11 @@ listed in {opt order()} has no matching row in the dataset.  Without this
 option unmatched items are silently ignored.
 
 {title:Examples}
-{phang}{cmd:. statareport__apply_order, order("age sex weight height")}
+{phang}{cmd:. statareport__apply_order, order("age sex weight height")}{p_end}
 
-{phang}{cmd:. statareport__apply_order, order("site1 site2 site3") match(site_name) strict}
+{phang}{cmd:. statareport__apply_order, order("site1 site2 site3") match(site_name) strict}{p_end}
 
-{phang}{cmd:. statareport__apply_order, order("adverse_event grade severity") match(variable)}
+{phang}{cmd:. statareport__apply_order, order("adverse_event grade severity") match(variable)}{p_end}
 
 {title:Also see}
-{psee}{help qual}, {help quant}
+{pstd}{help qual}, {help quant}{p_end}

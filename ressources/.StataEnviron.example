@@ -1,0 +1,21 @@
+# .StataEnviron -- project-local paths, loaded by `statareport_load_env'.
+#
+# Copy this file to `.StataEnviron' (gitignored) at the project root and
+# fill in the values for your machine. Every KEY=VALUE line below becomes
+# the Stata global $dir_<key> (lowercased) when statareport_load_env
+# runs at the top of your master do-file.
+#
+# Also accepted:
+#   - shell-style `#` comments and blank lines
+#   - optional `export ` prefix
+#   - single- or double-quoted values
+#   - any `STATAREPORT_<NAME>` key from the operating system environment
+
+# --- Shared cloud folder (OneDrive / SharePoint / Dropbox / ...) ---------
+# ONEDRIVE=/Users/you/Library/CloudStorage/OneDrive-YourOrg
+
+# --- Raw dataset export (feeds statareport_set_data_root) ----------------
+# DATASETS=/Users/you/Library/CloudStorage/OneDrive-YourOrg/Dataset_export/<YYYY-MM>/Stata
+
+# --- Project root override (rarely needed; `here' finds it by default) ---
+# PROJECT=/Users/you/projects/

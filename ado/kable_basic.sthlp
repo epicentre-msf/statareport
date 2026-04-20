@@ -65,11 +65,11 @@ specified string.  The default is {cmd:-}.
 table body.
 
 {title:Examples}
-{phang}{cmd:. sysuse auto, clear}{break}{cmd:. kable_basic, usevarnames}
+{phang}{cmd:. sysuse auto, clear}{break}{cmd:. kable_basic, usevarnames}{p_end}
 
-{phang}{cmd:. kable_basic, output("output_md/table1.md") caption("Baseline characteristics") footnote("Source: trial database.")}
+{phang}{cmd:. kable_basic, output("output_md/table1.md") caption("Baseline characteristics") footnote("Source: trial database.")}{p_end}
 
-{phang}{cmd:. kable_basic, space(30) round(0.1) nachar("N/A") usevarlabels}
+{phang}{cmd:. kable_basic, space(30) round(0.1) nachar("N/A") usevarlabels}{p_end}
 
 {title:Also see}
-{psee}{help kable}, {help convert_wisely}
+{pstd}{help kable}, {help convert_wisely}{p_end}

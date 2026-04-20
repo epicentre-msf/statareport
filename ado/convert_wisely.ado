@@ -28,7 +28,7 @@ program convert_wisely
         local header ""
         local varlabel : variable label `v'
 
-        local header ``v'[note1]'"
+        local header `"``v'[note1]'"'
         quietly note drop `v'
 
         if ("`usevarlabels'" != "") {
@@ -76,6 +76,6 @@ program convert_wisely
             label variable `v' "`varlabel'"
         }
 
-        note `v': `"`header''"
+        note `v': `"`header'"'
     }
 end

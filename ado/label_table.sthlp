@@ -22,6 +22,7 @@
 {synopt:{cmdab:label_n:ame(}{it:string}{cmd:)}}note attached to the {cmd:label} column{p_end}
 {synopt:{cmdab:value_n:ame(}{it:string}{cmd:)}}note propagated to all {cmd:value*} columns{p_end}
 {synopt:{cmdab:drop_v:alue(}{it:string}{cmd:)}}drop rows whose {cmd:value} matches this string{p_end}
+{synopt:{cmdab:keepid}}retain the {cmd:id} column in the output dataset{p_end}
 {synoptline}
 {p2colreset}{...}
 
@@ -54,12 +55,18 @@ variable.  This note is used by {help kable} as a column header.
 {phang}{cmd:drop_value(}{it:string}{cmd:)} drops rows whose {cmd:value}
 variable matches the specified string (case sensitive after trimming).
 
+{phang}{cmd:keepid} retains the {cmd:id} column alongside {cmd:label} and
+{cmd:value*} in the output dataset. By default only {cmd:label} and
+{cmd:value*} are kept, which is the format consumed by {help kable}.
+
 {title:Examples}
-{phang}{cmd:. label_table, tab_file("output_tables/ae_summary.dta") label_file("input_tables/labels.xlsx") tab_id("AE")}
+{phang}{cmd:. label_table, tab_file("output_tables/ae_summary.dta") label_file("input_tables/labels.xlsx") tab_id("AE")}{p_end}
 
-{phang}{cmd:. label_table, tab_file("output_tables/demographics.dta") label_file("input_tables/labels.xlsx") tab_id("DM") label_name("Characteristic") value_name("N (%)")}
+{phang}{cmd:. label_table, tab_file("output_tables/demographics.dta") label_file("input_tables/labels.xlsx") tab_id("DM") label_name("Characteristic") value_name("N (%)")}{p_end}
 
-{phang}{cmd:. label_table, tab_file("output_tables/lab_results.dta") label_file("input_tables/labels.xlsx") tab_id("LAB") drop_value("NA")}
+{phang}{cmd:. label_table, tab_file("output_tables/lab_results.dta") label_file("input_tables/labels.xlsx") tab_id("LAB") drop_value("NA")}{p_end}
+
+{phang}{cmd:. label_table, tab_file("output_tables/ae.dta") label_file("input_tables/labels.xlsx") tab_id("AE") keepid}{p_end}
 
 {title:Also see}
-{psee}{help qual}, {help quant}, {help create_dyntex}
+{pstd}{help qual}, {help quant}, {help create_dyntex}{p_end}

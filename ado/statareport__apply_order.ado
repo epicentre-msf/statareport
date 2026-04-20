@@ -28,13 +28,13 @@ program define statareport__apply_order
     confirm variable `matchvar'
 
     // Track rows that are not explicitly covered by the order list
-    tempvar __acozi_sort
-    gen double `__acozi_sort' = _N + _n
+    tempvar __statareport_sort
+    gen double `__statareport_sort' = _N + _n
 
     local idx = 0
     foreach item of local order {
         local ++idx
-        quietly replace `__acozi_sort' = `idx' if `matchvar' == "`item'"
+        quietly replace `__statareport_sort' = `idx' if `matchvar' == "`item'"
         quietly count if `matchvar' == "`item'"
         if ("`strict'" != "" & r(N) == 0) {
             display as error "statareport__apply_order: order item '`item'' not found in variable `matchvar'"
@@ -42,6 +42,6 @@ program define statareport__apply_order
         }
     }
 
-    sort `__acozi_sort'
-    drop `__acozi_sort'
+    sort `__statareport_sort'
+    drop `__statareport_sort'
 end

@@ -1,0 +1,52 @@
+name: Build and publish documentation
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Regenerate command pages from ado/*.sthlp
+        run: |
+          bash doc/build_commands.sh
+
+      - name: Install MkDocs + Material
+        # mkdocs-material is distributed as a Python package; we use pip
+        # purely as a build-time dependency (no Python code is checked in
+        # to the repository).
+        run: |
+          pip install --quiet mkdocs-material==9.5.30
+
+      - name: Build site
+        run: mkdocs build --strict --config-file doc/mkdocs.yml
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: doc/site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

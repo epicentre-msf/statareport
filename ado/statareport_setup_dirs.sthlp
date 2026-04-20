@@ -31,11 +31,11 @@ directory tree is created.  Path separators are normalised and trailing slashes
 are trimmed.  When omitted the current working directory is used.
 
 {title:Examples}
-{phang}{cmd:. statareport_setup_dirs}
+{phang}{cmd:. statareport_setup_dirs}{p_end}
 
-{phang}{cmd:. statareport_setup_dirs, root("C:/Projects/trial_report")}
+{phang}{cmd:. statareport_setup_dirs, root("C:/Projects/trial_report")}{p_end}
 
-{phang}{cmd:. statareport_setup_dirs, root("../my_analysis")}
+{phang}{cmd:. statareport_setup_dirs, root("../my_analysis")}{p_end}
 
 {title:Also see}
-{psee}{help knit}, {help create_dyntex}, {help qual}, {help quant}
+{pstd}{help knit}, {help create_dyntex}, {help qual}, {help quant}{p_end}

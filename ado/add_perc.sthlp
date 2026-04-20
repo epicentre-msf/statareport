@@ -4,9 +4,9 @@
 {pstd}{bf:add_perc} {hline 2} Annotate count variables with formatted percentages.
 
 {title:Syntax}
-{p 4 8 2}{cmd:add_perc} {varlist}(numeric) [{cmd:if}]{cmd:,}
-[{it:options}]
+{p 4 8 2}{cmd:add_perc} {it:varlist} [{cmd:if}] [{cmd:,} {it:options}]
 {p_end}
+{p 4 8 2}where {it:varlist} must contain only numeric count variables.{p_end}
 
 {synoptset 28 tabbed}{...}
 {synopthdr:Options}

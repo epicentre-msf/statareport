@@ -47,13 +47,13 @@ program kable
     //Number of variables
     if (_N == 0) {
         if ("`output'" != ""){
-            writenone "`output'" "`caption'" `"`footnote'"'
+            statareport__writenone "`output'" "`caption'" `"`footnote'"'
         }
         else{
             display as error "Empty data"
             tempfile f
-            writenone "`f'" "`caption'" `"`footnote'"'
-            read_file "`f'"
+            statareport__writenone "`f'" "`caption'" `"`footnote'"'
+            statareport__read_file "`f'"
         }
         exit
     }
@@ -96,42 +96,10 @@ program kable
     mata: kable_render()
 
     if ("`output'" == ""){
-        read_file "`outfile'"
+        statareport__read_file "`outfile'"
     }
 
     use "`savedtable'", clear
-end
-
-capture program drop read_file
-program read_file
-  args f
-  tempname myfile
-  file open `myfile' using "`f'", read
-        file read `myfile' line
-        while (r(eof) == 0) {
-          display as text `"`line'"'
-          file read `myfile' line
-        }
-  file close `myfile'
-end
-
-capture program drop writenone
-program writenone
-  args f caption footnote
-  tempname myfile
-  capture file close `myfile'
-  quietly file open `myfile' using "`f'", write replace
-  file write `myfile' "Table: `caption'" _n
-  file write `myfile' _n
-  file write `myfile' `":::{custom-style="Nonestyle"}"' _n
-  file write `myfile' "None" _n
-  file write `myfile' ":::"_n
-  if (`"`footnote'"' != "") {
-      file write `myfile' _n
-      file write `myfile' `"`footnote'"' _n
-  }
-  file write `myfile' _n
-  file close `myfile'
 end
 
 capture mata: mata drop kable_render()

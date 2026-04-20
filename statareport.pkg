@@ -1,9 +1,35 @@
 v 3
-d 'statareport': Custom analysis utilities for the TGL project
-d Author: Epicentre EpiDS
+d 'statareport': Custom analysis utilities for your project
+d Author: statareport contributors
 d Requires: Stata 15 or newer
-d Distribution-Date: 17 Feb 2026
+d Distribution-Date: 20 Apr 2026
 f ado/statareport__apply_order.ado
+f ado/statareport__read_file.ado
+f ado/statareport__writenone.ado
+f ado/statareport_set_paths.ado
+f ado/statareport_set_data_root.ado
+f ado/statareport_add_data.ado
+f ado/statareport_add_dir.ado
+f ado/statareport_add_programs.ado
+f ado/statareport_confirm_data.ado
+f ado/statareport_load_env.ado
+f ado/statareport_init_project.ado
+f ado/statareport_write_header.ado
+f ado/statareport_render.ado
+f ado/reportdo.ado
+f ressources/list-tables.lua
+f ressources/page-orientation.lua
+f ressources/table-breaks.lua
+f ressources/header.txt
+f ressources/header-listings.txt
+f ressources/default_options.yaml
+f ressources/default_options-listings.yaml
+f ressources/custom_reference.docx
+f ressources/custom_reference-listings.docx
+f ressources/tables_labels.xlsx
+f ressources/shift_graph_input.xlsx
+f ressources/.StataEnviron.example
+f ado/here.ado
 f ado/add_perc.ado
 f ado/compute_ci.ado
 f ado/compute_shift_graphs.ado
@@ -30,6 +56,20 @@ f ado/label_table.sthlp
 f ado/qual.sthlp
 f ado/quant.sthlp
 f ado/statareport__apply_order.sthlp
+f ado/statareport__read_file.sthlp
+f ado/statareport__writenone.sthlp
+f ado/statareport_set_paths.sthlp
+f ado/statareport_set_data_root.sthlp
+f ado/statareport_add_data.sthlp
+f ado/statareport_add_dir.sthlp
+f ado/statareport_add_programs.sthlp
+f ado/statareport_confirm_data.sthlp
+f ado/statareport_load_env.sthlp
+f ado/statareport_init_project.sthlp
+f ado/statareport_write_header.sthlp
+f ado/statareport_render.sthlp
+f ado/reportdo.sthlp
 f ado/statareport_setup_dirs.sthlp
+f ado/here.sthlp
 f examples/run_basic_report.do
 f examples/data/sample_patients.csv

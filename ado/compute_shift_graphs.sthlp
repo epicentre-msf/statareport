@@ -4,7 +4,7 @@
 {pstd}{bf:compute_shift_graphs} {hline 2} Create paired baseline vs post-baseline scatterplots with reference lines.
 
 {title:Syntax}
-{p 4 8 2}{cmd:compute_shift_graphs} {varname}(numeric) [{cmd:if}]{cmd:,}
+{p 4 8 2}{cmd:compute_shift_graphs} {it:varname} [{cmd:if}]{cmd:,}
 {cmdab:evar:iable(}{it:varname}{cmd:)} {cmdab:eval:ue(}{it:integer}{cmd:)} {cmdab:base:value(}{it:integer}{cmd:)}
 {cmdab:name(}{it:string}{cmd:)} {cmdab:id:variable(}{it:varname}{cmd:)} {cmdab:output:dir(}{it:string}{cmd:)}
 {cmdab:suf:fix(}{it:string}{cmd:)} {cmdab:conf:igfile(}{it:string}{cmd:)}

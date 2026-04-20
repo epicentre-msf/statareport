@@ -16,7 +16,7 @@ capture program drop label_table
 program label_table
     version 15
     syntax , TAB_file(string) LABEL_file(string) TAB_id(string) ///
-        [ LABEL_name(string) VALUE_name(string) DROP_value(string) ]
+        [ LABEL_name(string) VALUE_name(string) DROP_value(string) KEEPid ]
 
     confirm file "`tab_file'"
     confirm file "`label_file'"
@@ -71,8 +71,14 @@ program label_table
         sort id
     }
 
-    keep label value*
-    order label value*
+    if ("`keepid'" != "") {
+        keep id label value*
+        order id label value*
+    }
+    else {
+        keep label value*
+        order label value*
+    }
 
     if ("`label_name'" != "") {
         capture note label: `label_name'

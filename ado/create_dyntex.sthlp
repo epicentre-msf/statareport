@@ -52,11 +52,11 @@ referenced by the {bf:InputID} column.
 {it:N} rows of the label sheet.  Useful for debugging a subset of outputs.
 
 {title:Examples}
-{phang}{cmd:. create_dyntex using "input_tables/labels.xlsx", dyntex_file("output_md/report.txt") label_sheet("Tables") tab_dir("output_tables") fig_dir("output_figures")}
+{phang}{cmd:. create_dyntex using "input_tables/labels.xlsx", dyntex_file("output_md/report.txt") label_sheet("Tables") tab_dir("output_tables") fig_dir("output_figures")}{p_end}
 
-{phang}{cmd:. create_dyntex using "metadata.xlsx", dyntex_file("draft.txt") label_sheet("AllOutputs") tab_dir("tables") fig_dir("figures") nbinput(5)}
+{phang}{cmd:. create_dyntex using "metadata.xlsx", dyntex_file("draft.txt") label_sheet("AllOutputs") tab_dir("tables") fig_dir("figures") nbinput(5)}{p_end}
 
-{phang}{cmd:. create_dyntex using "labels.xlsx", dyntex_file("output_md/appendix.txt") label_sheet("Appendix") tab_dir("output_tables") fig_dir("output_figures")}
+{phang}{cmd:. create_dyntex using "labels.xlsx", dyntex_file("output_md/appendix.txt") label_sheet("Appendix") tab_dir("output_tables") fig_dir("output_figures")}{p_end}
 
 {title:Also see}
-{psee}{help kable}, {help knit}, {help label_table}
+{pstd}{help kable}, {help knit}, {help label_table}{p_end}

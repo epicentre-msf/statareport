@@ -98,9 +98,16 @@ list
 			local counter = 0
 
 			// For pct(row), precompute totals per row/variable to use as denominator
-			// across all by-groups.
+			// across all by-groups. qual expects binary (0/1) indicators; warn the
+			// user if any variable contains values outside {0, 1, missing}, since
+			// the row-percent interpretation only makes sense for indicators.
 			if ("`pct'" == "row") {
 				foreach v of varlist `varlist' {
+					quietly count if !missing(`v') & !inlist(`v', 0, 1) & `touse'
+					if (r(N) > 0) {
+						display as error "qual: pct(row) expects 0/1 indicators, but `v' has `r(N)' non-binary values"
+						exit 459
+					}
 					quietly summarize `v' if `touse', meanonly
 					local rowsum_`v' = r(sum)
 				}

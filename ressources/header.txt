@@ -1,0 +1,19 @@
+---
+title: "Study title"
+subtitle: |
+          One-line (or multi-line) description of the study. Replace this
+          placeholder with the real trial objective, phase, patient group,
+          and study design.
+author: Report
+---
+
+
+\newpage
+
+\listoftables
+
+\newpage
+
+\listoffigures
+
+\newpage

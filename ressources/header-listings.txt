@@ -1,0 +1,19 @@
+---
+title: "Study title -- listings"
+subtitle: |
+          Listings companion to the main report. Replace this placeholder
+          with a description of the listings document (e.g. patient-level
+          tables that accompany the main safety / efficacy report).
+author: Listings
+---
+
+
+\newpage
+
+\listoftables
+
+\newpage
+
+\listoffigures
+
+\newpage

@@ -4,9 +4,10 @@
 {pstd}{bf:quant} {hline 2} Generate descriptive summaries for numeric variables.
 
 {title:Syntax}
-{p 4 8 2}{cmd:quant} {varlist}(numeric) [{cmd:if}]{cmd:,}
+{p 4 8 2}{cmd:quant} {it:varlist} [{cmd:if}]{cmd:,}
 {cmdab:out:put(}{it:string}{cmd:)} [{it:options}]
 {p_end}
+{p 4 8 2}where {it:varlist} must contain only numeric variables.{p_end}
 
 {synoptset 26 tabbed}{...}
 {synopthdr:Options}

@@ -95,7 +95,7 @@ program add_perc
             label variable `v' "`vlabel'"
         }
         if ("`vnote1'" != "") {
-            note `v': `"`vnote1''"
+            note `v': `"`vnote1'"'
         }
 
         drop `base' `perc' `numtxt' `perctxt'

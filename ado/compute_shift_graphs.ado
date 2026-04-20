@@ -15,7 +15,7 @@ output directory and suffix.
 capture program drop compute_shift_graphs
 program define compute_shift_graphs
     version 15
-    syntax varname(min=1 numeric) [if], ///
+    syntax varname(numeric) [if], ///
         EVARiable(varname numeric) ///
         EVALue(integer) ///
         BASEvalue(integer) ///
@@ -115,6 +115,6 @@ program define compute_shift_graphs
             plotregion(fcolor(white) ifcolor(white))
     restore
 
-    capture graph save "`outputdir'/`measure'_`evalue'_`suffix'", replace
-    capture graph export "`outputdir'/`measure'_`evalue'_`suffix'.png", as(png) replace
+    graph save "`outputdir'/`measure'_`evalue'_`suffix'", replace
+    graph export "`outputdir'/`measure'_`evalue'_`suffix'.png", as(png) replace
 end

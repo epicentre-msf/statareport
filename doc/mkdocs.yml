@@ -1,0 +1,116 @@
+site_name: statareport
+site_description: A Stata package for automated Stata-to-Word report generation
+site_url: https://epicentre-msf.github.io/statareport/
+repo_url: https://github.com/epicentre-msf/statareport
+repo_name: epicentre-msf/statareport
+copyright: Copyright (c) contributors -- MIT License
+
+docs_dir: docs
+site_dir: site
+
+theme:
+  name: material
+  logo: assets/hexa.png
+  favicon: assets/hexa.png
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/weather-night
+        name: Switch to light mode
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - toc.follow
+    - content.code.copy
+    - content.code.annotate
+    - search.suggest
+    - search.highlight
+  font:
+    text: Inter
+    code: JetBrains Mono
+  icon:
+    repo: fontawesome/brands/github
+
+markdown_extensions:
+  - toc:
+      permalink: true
+      toc_depth: 3
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - attr_list
+  - md_in_html
+  - tables
+
+plugins:
+  - search
+
+nav:
+  - Home: index.md
+  - Getting started:
+    - Installation: install.md
+    - Your first report: tutorial.md
+  - Workflow:
+    - Overview: workflow.md
+    - Configuration (.StataEnviron): configuration.md
+    - Rendering pipeline: rendering.md
+  - Commands:
+    - Overview: commands/index.md
+    - Project scaffolding:
+      - here: commands/here.md
+      - statareport_init_project: commands/statareport_init_project.md
+      - statareport_setup_dirs: commands/statareport_setup_dirs.md
+      - statareport_load_env: commands/statareport_load_env.md
+      - statareport_add_dir: commands/statareport_add_dir.md
+      - statareport_add_programs: commands/statareport_add_programs.md
+      - statareport_set_paths: commands/statareport_set_paths.md
+      - statareport_set_data_root: commands/statareport_set_data_root.md
+      - statareport_add_data: commands/statareport_add_data.md
+      - statareport_confirm_data: commands/statareport_confirm_data.md
+      - reportdo: commands/reportdo.md
+    - Analysis:
+      - quant: commands/quant.md
+      - qual: commands/qual.md
+      - add_perc: commands/add_perc.md
+      - compute_ci: commands/compute_ci.md
+      - compute_shift_graphs: commands/compute_shift_graphs.md
+      - convert_wisely: commands/convert_wisely.md
+      - generate_label_ids: commands/generate_label_ids.md
+      - label_table: commands/label_table.md
+    - Rendering:
+      - statareport_render: commands/statareport_render.md
+      - statareport_write_header: commands/statareport_write_header.md
+      - create_dyntex: commands/create_dyntex.md
+      - kable: commands/kable.md
+      - kable_basic: commands/kable_basic.md
+      - knit: commands/knit.md
+  - About:
+    - Changelog: changelog.md
+    - Contributing: contributing.md
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/epicentre-msf/statareport

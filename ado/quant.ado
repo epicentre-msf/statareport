@@ -170,6 +170,8 @@ program quant
 				local nobs = `r(N)'
 				local emptydb = (`nobs' == 0)
 
+				local sm ""
+				local allperc ""
 
 				if (!`emptydb'){
 					local mn = string(`r(mean)', "`format'")
@@ -182,10 +184,9 @@ program quant
 						local min = string(`r(min)', "`format'")
 						local max = string(`r(max)', "`format'")
 					}
-				}
 
-				local grp_sum = `r(sum)'
-				local sm = string(`grp_sum', "`format'")
+					local grp_sum = `r(sum)'
+					local sm = string(`grp_sum', "`format'")
 
 					if ("`sumonly'" != "") {
 						local totalsm = `totalsum_`v''
@@ -194,12 +195,11 @@ program quant
 							local allperc = string(100 * `grp_sum' / `totalsm', "`format'")
 						}
 					}
-
-
+				}
 
 				local fpart "`nobs', "
 
-				if ("`sumonly'"!=""){
+				if (("`sumonly'" != "") & (!`emptydb')){
 					local quantval = "`sm' (`allperc')"
 				}
 
@@ -269,6 +269,9 @@ program quant
 			local nobs = `r(N)'
 			local emptydb = (`nobs' == 0)
 
+			local sm ""
+			local allperc ""
+
 			if (!`emptydb'){
 				local mn = string(`r(mean)', "`format'")
 				local sd = string(`r(sd)', "`format'")
@@ -279,10 +282,9 @@ program quant
 					local min = string(`r(min)', "`format'")
 					local max = string(`r(max)', "`format'")
 				}
-			}
 
-			local grp_sum = `r(sum)'
-			local sm = string(`grp_sum', "`format'")
+				local grp_sum = `r(sum)'
+				local sm = string(`grp_sum', "`format'")
 
 				if ("`sumonly'" != "") {
 					local totalsm = `totalsum_`v''
@@ -291,11 +293,12 @@ program quant
 						local allperc = string(100 * `grp_sum' / `totalsm', "`format'")
 					}
 				}
+			}
 
 			local fpart "`nobs', "
 
 
-			if ("`sumonly'"!=""){
+			if (("`sumonly'" != "") & (!`emptydb')){
 				local quantval = "`sm' (`allperc')"
 			}
 
