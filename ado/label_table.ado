@@ -61,7 +61,14 @@ program label_table
 
     quietly tostring id, replace
 
-    merge 1:1 id using "`labels_dta'", keep(master match) nogenerate
+    // Both master (from quant/qual) and using (from the Excel sheet) carry a
+    // `label' column. `update replace' makes the Excel label win — without
+    // this, Stata silently keeps the master's value and every Excel label
+    // edit is ignored. The expanded keep() list is required because update
+    // creates extra _merge codes (match_update, match_conflict) that the
+    // bare keep(master match) would drop.
+    merge 1:1 id using "`labels_dta'", ///
+        keep(master match match_update match_conflict) update replace nogenerate
 
     if ("`drop_value'" != "") {
         capture confirm variable value

@@ -67,3 +67,6 @@ logs
 source/
 .vscode/
 tools/
+
+# any other log files
+*.log
