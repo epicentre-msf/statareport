@@ -55,26 +55,19 @@ user's datasets.
 
 ## Resulting layout
 
-> `<root>/`  
-`|-- do_files/`  
-`|   |-- 00-final-do-file.do`         -- fully populated master do-file  
-`|   |-- 01-create-datasets.do`       -- stub  
-`|   |-- 02-patients-dispositions.do` -- stub  
-`|   |-- 03-baseline.do`              -- stub  
-`|   |-- 04-adherence.do`             -- stub  
-`|   |-- 05-efficacy.do`              -- stub  
-`|   |-- 06-safety.do`                -- stub  
-`|   |-- 07-listings.do`              -- stub  
-`|   `-- helpers/`  
-`|-- programs/`  
-`|-- input_md/`         -- header.txt, header-listings.txt, *.lua stubs  
-`|-- input_tables/`     -- drop tables_labels.xlsx, shift_graph_input.xlsx here  
-`|-- output_md/`  
-`|-- output_tables/labelled_tables/`  
-`|-- output_figures/`  
-`|-- output_word/`  
-`|-- local_datasets/`  
-``-- logs/`
+Created under `<root>/`:
+
+    `do_files/`           -- master 00-final-do-file.do + step 01-07 stubs + helpers/
+    `programs/`           -- project-local ado files (added to adopath)
+    `input_md/`           -- pandoc headers, Lua filters, reference.docx, default YAML
+    `input_tables/`       -- tables_labels.xlsx, shift_graph_input.xlsx
+    `output_md/`          -- generated Markdown (<prefix>-dyn.txt, <prefix>.txt)
+    `output_tables/`      -- analysis .dta files; includes labelled_tables/ subfolder
+    `output_figures/`     -- .gph / .png produced by compute_shift_graphs
+    `output_word/`        -- final rendered docx
+    `local_datasets/`     -- derived .dta files used within the project
+    `logs/`               -- Stata log files
+    `.StataEnviron.example` -- copy to `.StataEnviron` for local paths
 
 
 ## Examples

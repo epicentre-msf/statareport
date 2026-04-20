@@ -6,28 +6,10 @@
 - [Pandoc](https://pandoc.org/) on the PATH (for `knit` / `statareport_render`).
   `brew install pandoc`, `choco install pandoc`, or see Pandoc's install page.
 
-## From GitHub
+## Install from GitHub
 
 ```stata
 net install statareport, from("https://raw.githubusercontent.com/epicentre-msf/statareport/main/") replace
-```
-
-The trailing slash matters — Stata appends `stata.toc` and
-`statareport.pkg` to the URL. `replace` lets you pull updates over an
-existing install.
-
-!!! note "Package in a subfolder"
-    If the package is inside a subfolder of the repository:
-    ```stata
-    net install statareport, from("https://raw.githubusercontent.com/<org>/<repo>/<branch>/<subfolder>/") replace
-    ```
-
-## From a local directory
-
-Handy while developing or for offline installs:
-
-```stata
-net install statareport, from("/path/to/repo/statareport/") replace
 ```
 
 ## What lands on disk

@@ -17,6 +17,7 @@ f ado/statareport_init_project.ado
 f ado/statareport_write_header.ado
 f ado/statareport_render.ado
 f ado/reportdo.ado
+f ado/lastexport.ado
 f ressources/list-tables.lua
 f ressources/page-orientation.lua
 f ressources/table-breaks.lua
@@ -69,6 +70,7 @@ f ado/statareport_init_project.sthlp
 f ado/statareport_write_header.sthlp
 f ado/statareport_render.sthlp
 f ado/reportdo.sthlp
+f ado/lastexport.sthlp
 f ado/statareport_setup_dirs.sthlp
 f ado/here.sthlp
 f examples/run_basic_report.do

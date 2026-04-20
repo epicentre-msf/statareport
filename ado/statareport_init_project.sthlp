@@ -46,26 +46,19 @@ overwrite them. The command never touches {cmd:output_*} folders or the
 user's datasets.{p_end}
 
 {title:Resulting layout}
-{phang}{cmd:<root>/}{break}
-{cmd:|-- do_files/}{break}
-{cmd:|   |-- 00-final-do-file.do}         -- fully populated master do-file{break}
-{cmd:|   |-- 01-create-datasets.do}       -- stub{break}
-{cmd:|   |-- 02-patients-dispositions.do} -- stub{break}
-{cmd:|   |-- 03-baseline.do}              -- stub{break}
-{cmd:|   |-- 04-adherence.do}             -- stub{break}
-{cmd:|   |-- 05-efficacy.do}              -- stub{break}
-{cmd:|   |-- 06-safety.do}                -- stub{break}
-{cmd:|   |-- 07-listings.do}              -- stub{break}
-{cmd:|   `-- helpers/}{break}
-{cmd:|-- programs/}{break}
-{cmd:|-- input_md/}         -- header.txt, header-listings.txt, *.lua stubs{break}
-{cmd:|-- input_tables/}     -- drop tables_labels.xlsx, shift_graph_input.xlsx here{break}
-{cmd:|-- output_md/}{break}
-{cmd:|-- output_tables/labelled_tables/}{break}
-{cmd:|-- output_figures/}{break}
-{cmd:|-- output_word/}{break}
-{cmd:|-- local_datasets/}{break}
-{cmd:`-- logs/}{p_end}
+{pstd}Created under {cmd:<root>/}:{p_end}
+
+{phang2}{cmd:do_files/}           -- master 00-final-do-file.do + step 01-07 stubs + helpers/{p_end}
+{phang2}{cmd:programs/}           -- project-local ado files (added to adopath){p_end}
+{phang2}{cmd:input_md/}           -- pandoc headers, Lua filters, reference.docx, default YAML{p_end}
+{phang2}{cmd:input_tables/}       -- tables_labels.xlsx, shift_graph_input.xlsx{p_end}
+{phang2}{cmd:output_md/}          -- generated Markdown (<prefix>-dyn.txt, <prefix>.txt){p_end}
+{phang2}{cmd:output_tables/}      -- analysis .dta files; includes labelled_tables/ subfolder{p_end}
+{phang2}{cmd:output_figures/}     -- .gph / .png produced by compute_shift_graphs{p_end}
+{phang2}{cmd:output_word/}        -- final rendered docx{p_end}
+{phang2}{cmd:local_datasets/}     -- derived .dta files used within the project{p_end}
+{phang2}{cmd:logs/}               -- Stata log files{p_end}
+{phang2}{cmd:.StataEnviron.example} -- copy to {cmd:.StataEnviron} for local paths{p_end}
 
 {title:Examples}
 {phang}{cmd:. here}{p_end}

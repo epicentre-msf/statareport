@@ -60,6 +60,9 @@ markdown_extensions:
       pygments_lang_class: true
   - pymdownx.inlinehilite
   - pymdownx.snippets
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
   - attr_list
   - md_in_html
   - tables
@@ -71,7 +74,7 @@ nav:
   - Home: index.md
   - Getting started:
     - Installation: install.md
-    - Your first report: tutorial.md
+    - Create your first report: tutorial.md
   - Workflow:
     - Overview: workflow.md
     - Configuration (.StataEnviron): configuration.md
@@ -89,6 +92,7 @@ nav:
       - statareport_set_data_root: commands/statareport_set_data_root.md
       - statareport_add_data: commands/statareport_add_data.md
       - statareport_confirm_data: commands/statareport_confirm_data.md
+      - lastexport: commands/lastexport.md
       - reportdo: commands/reportdo.md
     - Analysis:
       - quant: commands/quant.md
