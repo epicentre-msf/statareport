@@ -1,0 +1,28 @@
+/* Grid-table code blocks (the literal output of kable) are often wider than
+   the content column. Force a horizontal scrollbar instead of letting the
+   right edge get clipped, and keep the whole block in a monospaced font. */
+
+.md-typeset pre {
+    overflow-x: auto;
+}
+
+.md-typeset pre > code {
+    white-space: pre;       /* preserve grid alignment */
+    word-wrap: normal;
+    overflow-wrap: normal;
+    display: block;
+    min-width: max-content; /* so the scroll container knows the full width */
+}
+
+/* Render inline ascii-grid tables (when users paste them without fences) in
+   monospace as well. No visual change when the surrounding code already uses
+   a highlighted style. */
+.md-typeset .highlight pre code {
+    font-family: var(--md-code-font-family, ui-monospace, monospace);
+}
+
+/* Mermaid diagrams: center and give them a bit of breathing room. */
+.md-typeset .mermaid {
+    text-align: center;
+    margin: 1em 0;
+}

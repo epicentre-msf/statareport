@@ -2,11 +2,23 @@
 
 `statareport` builds every table in three steps:
 
-| Step | Command | Output |
-|---|---|---|
-| 1. Compute | [`quant`](commands/quant.md) / [`qual`](commands/qual.md) | `.dta` with `variable`, `label`, `value*`, `id` columns |
-| 2. Label | [`label_table`](commands/label_table.md) | same `.dta`, with human-readable labels merged from Excel |
-| 3. Render | [`kable`](commands/kable.md) | a Pandoc Markdown grid table |
+=== "Formatted"
+
+    | Step | Command | Output |
+    |---|---|---|
+    | 1. Compute | [`quant`](commands/quant.md) / [`qual`](commands/qual.md) | `.dta` with `variable`, `label`, `value*`, `id` columns |
+    | 2. Label | [`label_table`](commands/label_table.md) | same `.dta`, with human-readable labels merged from Excel |
+    | 3. Render | [`kable`](commands/kable.md) | a Pandoc Markdown grid table |
+
+=== "Source"
+
+    ```markdown
+    | Step | Command | Output |
+    |---|---|---|
+    | 1. Compute | [`quant`](commands/quant.md) / [`qual`](commands/qual.md) | `.dta` with `variable`, `label`, `value*`, `id` columns |
+    | 2. Label | [`label_table`](commands/label_table.md) | same `.dta`, with human-readable labels merged from Excel |
+    | 3. Render | [`kable`](commands/kable.md) | a Pandoc Markdown grid table |
+    ```
 
 ```mermaid
 flowchart LR
@@ -43,24 +55,34 @@ kable, caption("Price, mileage and weight by origin")
 
 The rendered grid (verified on `sysuse auto`):
 
-```
-Table: Price, mileage and weight by origin
+=== "Formatted"
+
+    | Characteristic | Domestic<br>(N = 52) | Foreign<br>(N = 22) | Total<br>(N = 74) |
+    |----------------|---|---|---|
+    | Price          | 4782<br>[4184 ; 6234]<br>(3291 / 15906) | 5759<br>[4499 ; 7140]<br>(3748 / 12990) | 74, 5006<br>[4195 ; 6342]<br>(3291 / 15906) |
+    | Mileage (mpg)  | 19<br>[16 ; 22]<br>(12 / 34)            | 24<br>[21 ; 28]<br>(14 / 41)            | 74, 20<br>[18 ; 25]<br>(12 / 41)            |
+    | Weight (lbs.)  | 3360<br>[2790 ; 3730]<br>(1800 / 4840)  | 2180<br>[2020 ; 2650]<br>(1760 / 3420)  | 74, 3190<br>[2240 ; 3600]<br>(1760 / 4840)  |
+
+=== "Raw (what kable writes)"
+
+    ```text
+    Table: Price, mileage and weight by origin
 
 
-+----------------+---------------------+---------------------+--------------------------+
-| Characteristic | Domestic            | Foreign             | Total                    |
-|                | (N = 52)            | (N = 22)            | (N = 74)                 |
-+:===============+====================:+====================:+=========================:+
-| Price          | 4782  [4184 ; 6234] | 5759  [4499 ; 7140] | 74,  5006  [4195 ; 6342] |
-|                | (3291 / 15906)      | (3748 / 12990)      | (3291 / 15906)           |
-+----------------+---------------------+---------------------+--------------------------+
-| Mileage (mpg)  | 19  [16 ; 22]       | 24  [21 ; 28]       | 74,  20  [18 ; 25]       |
-|                | (12 / 34)           | (14 / 41)           | (12 / 41)                |
-+----------------+---------------------+---------------------+--------------------------+
-| Weight (lbs.)  | 3360  [2790 ; 3730] | 2180  [2020 ; 2650] | 74,  3190  [2240 ; 3600] |
-|                | (1800 / 4840)       | (1760 / 3420)       | (1760 / 4840)            |
-+----------------+---------------------+---------------------+--------------------------+
-```
+    +----------------+---------------------+---------------------+--------------------------+
+    | Characteristic | Domestic            | Foreign             | Total                    |
+    |                | (N = 52)            | (N = 22)            | (N = 74)                 |
+    +:===============+====================:+====================:+=========================:+
+    | Price          | 4782  [4184 ; 6234] | 5759  [4499 ; 7140] | 74,  5006  [4195 ; 6342] |
+    |                | (3291 / 15906)      | (3748 / 12990)      | (3291 / 15906)           |
+    +----------------+---------------------+---------------------+--------------------------+
+    | Mileage (mpg)  | 19  [16 ; 22]       | 24  [21 ; 28]       | 74,  20  [18 ; 25]       |
+    |                | (12 / 34)           | (14 / 41)           | (12 / 41)                |
+    +----------------+---------------------+---------------------+--------------------------+
+    | Weight (lbs.)  | 3360  [2790 ; 3730] | 2180  [2020 ; 2650] | 74,  3190  [2240 ; 3600] |
+    |                | (1800 / 4840)       | (1760 / 3420)       | (1760 / 4840)            |
+    +----------------+---------------------+---------------------+--------------------------+
+    ```
 
 !!! note "`save` after `label_table`"
     `label_table` rewrites the in-memory dataset (drops `variable`/`id`,
@@ -86,11 +108,23 @@ the sheet and merges it onto the dataset.
 
 Minimum layout of a sheet (here `auto_quant`):
 
-| id | label           | order |
-|----|-----------------|-------|
-| 1  | Price           | 1     |
-| 2  | Mileage (mpg)   | 2     |
-| 3  | Weight (lbs.)   | 3     |
+=== "Formatted"
+
+    | id | label           | order |
+    |----|-----------------|-------|
+    | 1  | Price           | 1     |
+    | 2  | Mileage (mpg)   | 2     |
+    | 3  | Weight (lbs.)   | 3     |
+
+=== "Source"
+
+    ```markdown
+    | id | label           | order |
+    |----|-----------------|-------|
+    | 1  | Price           | 1     |
+    | 2  | Mileage (mpg)   | 2     |
+    | 3  | Weight (lbs.)   | 3     |
+    ```
 
 Required columns are `id` and `label`; `order` is optional and, when
 present, drives the row order of the final table. `label_table` drops the
@@ -121,19 +155,43 @@ one `kable` actually renders — reflects the `order` edits.
 
 Example — suppress the `Mileage (mpg)` row without touching Stata code:
 
-| id | label           | order |
-|----|-----------------|-------|
-| 1  | Price           | 1     |
-| 2  | Mileage (mpg)   |       |  ← blank: row dropped from the report
-| 3  | Weight (lbs.)   | 2     |
+=== "Formatted"
+
+    | id | label           | order       |
+    |----|-----------------|-------------|
+    | 1  | Price           | 1           |
+    | 2  | Mileage (mpg)   | *(blank)*   |
+    | 3  | Weight (lbs.)   | 2           |
+
+=== "Source"
+
+    ```markdown
+    | id | label           | order |
+    |----|-----------------|-------|
+    | 1  | Price           | 1     |
+    | 2  | Mileage (mpg)   |       |
+    | 3  | Weight (lbs.)   | 2     |
+    ```
 
 Move `Weight` above `Price`? Swap the order values:
 
-| id | label           | order |
-|----|-----------------|-------|
-| 1  | Price           | 2     |
-| 2  | Mileage (mpg)   | 3     |
-| 3  | Weight (lbs.)   | 1     |
+=== "Formatted"
+
+    | id | label           | order |
+    |----|-----------------|-------|
+    | 1  | Price           | 2     |
+    | 2  | Mileage (mpg)   | 3     |
+    | 3  | Weight (lbs.)   | 1     |
+
+=== "Source"
+
+    ```markdown
+    | id | label           | order |
+    |----|-----------------|-------|
+    | 1  | Price           | 2     |
+    | 2  | Mileage (mpg)   | 3     |
+    | 3  | Weight (lbs.)   | 1     |
+    ```
 
 !!! tip "Leave gaps in your `order` numbers"
     Number rows `10, 20, 30, ...` instead of `1, 2, 3`. Inserting a new

@@ -16,11 +16,23 @@ quant price mpg weight, output("output_tables/auto_quant.dta")
 
 The saved dataset has four columns (default format `%9.1f`):
 
-| variable | label            | value                                                 | id |
-|----------|------------------|-------------------------------------------------------|----|
-| price    | Price            | `74, 5006.5 [4195.0 ; 6342.0] \n (3291.0 / 15906.0)`  | 1  |
-| mpg      | Mileage (mpg)    | `74, 20.0 [18.0 ; 25.0] \n (12.0 / 41.0)`             | 2  |
-| weight   | Weight (lbs.)    | `74, 3190.0 [2240.0 ; 3600.0] \n (1760.0 / 4840.0)`   | 3  |
+=== "Formatted"
+
+    | variable | label            | value                                                 | id |
+    |----------|------------------|-------------------------------------------------------|----|
+    | price    | Price            | `74, 5006.5 [4195.0 ; 6342.0] \n (3291.0 / 15906.0)`  | 1  |
+    | mpg      | Mileage (mpg)    | `74, 20.0 [18.0 ; 25.0] \n (12.0 / 41.0)`             | 2  |
+    | weight   | Weight (lbs.)    | `74, 3190.0 [2240.0 ; 3600.0] \n (1760.0 / 4840.0)`   | 3  |
+
+=== "Source"
+
+    ```markdown
+    | variable | label         | value                                             | id |
+    |----------|---------------|---------------------------------------------------|----|
+    | price    | Price         | 74, 5006.5 [4195.0 ; 6342.0] \n (3291.0 / 15906.0) | 1  |
+    | mpg      | Mileage (mpg) | 74, 20.0 [18.0 ; 25.0] \n (12.0 / 41.0)           | 2  |
+    | weight   | Weight (lbs.) | 74, 3190.0 [2240.0 ; 3600.0] \n (1760.0 / 4840.0) | 3  |
+    ```
 
 The embedded `\n` becomes a real line break when `kable` renders the cell.
 
@@ -41,11 +53,23 @@ save "output_tables/auto_quant.dta", replace
 
 Minimum Excel sheet:
 
-| id | label          | order |
-|----|----------------|-------|
-| 1  | Price          | 1     |
-| 2  | Mileage (mpg)  | 2     |
-| 3  | Weight (lbs.)  | 3     |
+=== "Formatted"
+
+    | id | label          | order |
+    |----|----------------|-------|
+    | 1  | Price          | 1     |
+    | 2  | Mileage (mpg)  | 2     |
+    | 3  | Weight (lbs.)  | 3     |
+
+=== "Source"
+
+    ```markdown
+    | id | label          | order |
+    |----|----------------|-------|
+    | 1  | Price          | 1     |
+    | 2  | Mileage (mpg)  | 2     |
+    | 3  | Weight (lbs.)  | 3     |
+    ```
 
 !!! tip "Reorder or hide rows from Excel"
     The `order` column drives row order in the labelled output. Clear
@@ -72,24 +96,34 @@ kable, caption("Price, mileage and weight")
 
 renders (verified output at default format `%9.1f`):
 
-```
-Table: Price, mileage and weight
+=== "Formatted"
+
+    | Characteristic | Total<br>(N = 74) |
+    |----------------|---|
+    | Price          | 74, 5006.5<br>[4195.0 ; 6342.0]<br>(3291.0 / 15906.0) |
+    | Mileage (mpg)  | 74, 20.0<br>[18.0 ; 25.0]<br>(12.0 / 41.0) |
+    | Weight (lbs.)  | 74, 3190.0<br>[2240.0 ; 3600.0]<br>(1760.0 / 4840.0) |
+
+=== "Raw (what kable writes)"
+
+    ```text
+    Table: Price, mileage and weight
 
 
-+----------------+--------------------------------+
-| Characteristic | Total                          |
-|                | (N = 74)                       |
-+:===============+===============================:+
-| Price          | 74,  5006.5  [4195.0 ; 6342.0] |
-|                | (3291.0 / 15906.0)             |
-+----------------+--------------------------------+
-| Mileage (mpg)  | 74,  20.0  [18.0 ; 25.0]       |
-|                | (12.0 / 41.0)                  |
-+----------------+--------------------------------+
-| Weight (lbs.)  | 74,  3190.0  [2240.0 ; 3600.0] |
-|                | (1760.0 / 4840.0)              |
-+----------------+--------------------------------+
-```
+    +----------------+--------------------------------+
+    | Characteristic | Total                          |
+    |                | (N = 74)                       |
+    +:===============+===============================:+
+    | Price          | 74,  5006.5  [4195.0 ; 6342.0] |
+    |                | (3291.0 / 15906.0)             |
+    +----------------+--------------------------------+
+    | Mileage (mpg)  | 74,  20.0  [18.0 ; 25.0]       |
+    |                | (12.0 / 41.0)                  |
+    +----------------+--------------------------------+
+    | Weight (lbs.)  | 74,  3190.0  [2240.0 ; 3600.0] |
+    |                | (1760.0 / 4840.0)              |
+    +----------------+--------------------------------+
+    ```
 
 The trailing `.0` comes from `%9.1f`. Integer variables (price, weight,
 counts) read more cleanly with `format(%9.0f)`, shown in the next
@@ -116,24 +150,34 @@ Each level of `foreign` becomes a `value_*` column with its own
 `(N = …)` header; `addtotal` appends an overall column. Verified
 output:
 
-```
-Table: Price, mileage and weight by origin
+=== "Formatted"
+
+    | Characteristic | Domestic<br>(N = 52) | Foreign<br>(N = 22) | Total<br>(N = 74) |
+    |----------------|---|---|---|
+    | Price          | 4782<br>[4184 ; 6234]<br>(3291 / 15906) | 5759<br>[4499 ; 7140]<br>(3748 / 12990) | 74, 5006<br>[4195 ; 6342]<br>(3291 / 15906) |
+    | Mileage (mpg)  | 19<br>[16 ; 22]<br>(12 / 34)            | 24<br>[21 ; 28]<br>(14 / 41)            | 74, 20<br>[18 ; 25]<br>(12 / 41)            |
+    | Weight (lbs.)  | 3360<br>[2790 ; 3730]<br>(1800 / 4840)  | 2180<br>[2020 ; 2650]<br>(1760 / 3420)  | 74, 3190<br>[2240 ; 3600]<br>(1760 / 4840)  |
+
+=== "Raw (what kable writes)"
+
+    ```text
+    Table: Price, mileage and weight by origin
 
 
-+----------------+---------------------+---------------------+--------------------------+
-| Characteristic | Domestic            | Foreign             | Total                    |
-|                | (N = 52)            | (N = 22)            | (N = 74)                 |
-+:===============+====================:+====================:+=========================:+
-| Price          | 4782  [4184 ; 6234] | 5759  [4499 ; 7140] | 74,  5006  [4195 ; 6342] |
-|                | (3291 / 15906)      | (3748 / 12990)      | (3291 / 15906)           |
-+----------------+---------------------+---------------------+--------------------------+
-| Mileage (mpg)  | 19  [16 ; 22]       | 24  [21 ; 28]       | 74,  20  [18 ; 25]       |
-|                | (12 / 34)           | (14 / 41)           | (12 / 41)                |
-+----------------+---------------------+---------------------+--------------------------+
-| Weight (lbs.)  | 3360  [2790 ; 3730] | 2180  [2020 ; 2650] | 74,  3190  [2240 ; 3600] |
-|                | (1800 / 4840)       | (1760 / 3420)       | (1760 / 4840)            |
-+----------------+---------------------+---------------------+--------------------------+
-```
+    +----------------+---------------------+---------------------+--------------------------+
+    | Characteristic | Domestic            | Foreign             | Total                    |
+    |                | (N = 52)            | (N = 22)            | (N = 74)                 |
+    +:===============+====================:+====================:+=========================:+
+    | Price          | 4782  [4184 ; 6234] | 5759  [4499 ; 7140] | 74,  5006  [4195 ; 6342] |
+    |                | (3291 / 15906)      | (3748 / 12990)      | (3291 / 15906)           |
+    +----------------+---------------------+---------------------+--------------------------+
+    | Mileage (mpg)  | 19  [16 ; 22]       | 24  [21 ; 28]       | 74,  20  [18 ; 25]       |
+    |                | (12 / 34)           | (14 / 41)           | (12 / 41)                |
+    +----------------+---------------------+---------------------+--------------------------+
+    | Weight (lbs.)  | 3360  [2790 ; 3730] | 2180  [2020 ; 2650] | 74,  3190  [2240 ; 3600] |
+    |                | (1800 / 4840)       | (1760 / 3420)       | (1760 / 4840)            |
+    +----------------+---------------------+---------------------+--------------------------+
+    ```
 
 !!! note
     Within-group cells drop the `N,` prefix — each column header
@@ -155,22 +199,49 @@ quant price,     output("auto_sum.dta")  sumonly by(foreign) addtotal   // sum (
 
 Verified on `sysuse auto`:
 
-| mode         | rendered cell (on `price`)                               |
-|--------------|----------------------------------------------------------|
-| *(default)*  | `74,  5006.5  [4195.0 ; 6342.0] \n (3291.0 / 15906.0)`   |
-| `meanonly`   | `74, 6165.3 (2949.5)`                                    |
-| `medianonly` | `5006.5  [4195.0 ; 6342.0] \n (3291.0 / 15906.0)`        |
-| `sumonly`    | Domestic `315766.0 (69.2)`, Foreign `140463.0 (30.8)`, Total `456229.0 (100.0)` |
+=== "Formatted"
+
+    | mode         | rendered cell (on `price`)                               |
+    |--------------|----------------------------------------------------------|
+    | *(default)*  | `74, 5006.5 [4195.0 ; 6342.0] \n (3291.0 / 15906.0)`     |
+    | `meanonly`   | `74, 6165.3 (2949.5)`                                    |
+    | `medianonly` | `5006.5 [4195.0 ; 6342.0] \n (3291.0 / 15906.0)`         |
+    | `sumonly`    | Domestic `315766.0 (69.2)`, Foreign `140463.0 (30.8)`, Total `456229.0 (100.0)` |
+
+=== "Source"
+
+    ```markdown
+    | mode         | rendered cell (on `price`)                                                     |
+    |--------------|--------------------------------------------------------------------------------|
+    | *(default)*  | 74, 5006.5 [4195.0 ; 6342.0] \n (3291.0 / 15906.0)                             |
+    | `meanonly`   | 74, 6165.3 (2949.5)                                                            |
+    | `medianonly` | 5006.5 [4195.0 ; 6342.0] \n (3291.0 / 15906.0)                                 |
+    | `sumonly`    | Domestic 315766.0 (69.2), Foreign 140463.0 (30.8), Total 456229.0 (100.0)      |
+    ```
 
 ## Formatting knobs
 
-| option | default | effect |
-|---|---|---|
-| `format()` | `%9.1f` | any Stata numeric format |
-| `mxsep()` | `/` | min/max separator |
-| `mxbrack` | off | use `[min/max]` instead of `(min/max)` |
-| `medsep()` | `;` | IQR separator |
-| `medparenth` | off | use `(p25; p75)` instead of `[p25; p75]` |
+=== "Formatted"
+
+    | option | default | effect |
+    |---|---|---|
+    | `format()` | `%9.1f` | any Stata numeric format |
+    | `mxsep()` | `/` | min/max separator |
+    | `mxbrack` | off | use `[min/max]` instead of `(min/max)` |
+    | `medsep()` | `;` | IQR separator |
+    | `medparenth` | off | use `(p25; p75)` instead of `[p25; p75]` |
+
+=== "Source"
+
+    ```markdown
+    | option       | default | effect |
+    |--------------|---------|--------|
+    | `format()`   | `%9.1f` | any Stata numeric format |
+    | `mxsep()`    | `/`     | min/max separator |
+    | `mxbrack`    | off     | use `[min/max]` instead of `(min/max)` |
+    | `medsep()`   | `;`     | IQR separator |
+    | `medparenth` | off     | use `(p25; p75)` instead of `[p25; p75]` |
+    ```
 
 ```stata
 quant price mpg, output("auto_fmt.dta") ///
