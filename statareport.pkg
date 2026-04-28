@@ -8,6 +8,7 @@ f ado/statareport__read_file.ado
 f ado/statareport__writenone.ado
 f ado/statareport_set_paths.ado
 f ado/statareport_set_data_root.ado
+f ado/statareport_set_local_data_root.ado
 f ado/statareport_add_data.ado
 f ado/statareport_add_dir.ado
 f ado/statareport_add_programs.ado
@@ -61,6 +62,7 @@ f ado/statareport__read_file.sthlp
 f ado/statareport__writenone.sthlp
 f ado/statareport_set_paths.sthlp
 f ado/statareport_set_data_root.sthlp
+f ado/statareport_set_local_data_root.sthlp
 f ado/statareport_add_data.sthlp
 f ado/statareport_add_dir.sthlp
 f ado/statareport_add_programs.sthlp

@@ -33,7 +33,7 @@ display as text "repo = `repo'"
 
 do _helpers.do
 
-local suites test_convert_wisely test_label_table test_statareport_set_paths test_quant test_qual test_kable_pipeline
+local suites test_convert_wisely test_label_table test_statareport_set_paths test_statareport_local_data_root test_quant test_qual test_kable_pipeline
 
 foreach s of local suites {
     display as result _newline(1) "########## running `s' ##########"

@@ -15,6 +15,7 @@ shows the same content.
 | [`statareport_add_programs`](statareport_add_programs.md) | `adopath ++` under project root |
 | [`statareport_set_paths`](statareport_set_paths.md) | emit the full `$file_*` family |
 | [`statareport_set_data_root`](statareport_set_data_root.md) | cache the default data directory |
+| [`statareport_set_local_data_root`](statareport_set_local_data_root.md) | cache a project-local data directory |
 | [`statareport_add_data`](statareport_add_data.md) | register `$data_<name>` and confirm presence |
 | [`statareport_confirm_data`](statareport_confirm_data.md) | re-verify every `$data_*` global |
 | [`lastexport`](lastexport.md) | find the newest dated export folder (YYYYMMDD) under a parent |

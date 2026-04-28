@@ -31,6 +31,12 @@ cache whenever it receives a relative path, mirroring the role of
 [`statareport_confirm_data`](statareport_confirm_data.md) to audit the resulting `$data_*`
 globals.
 
+For derived / intermediate datasets that live *inside* the
+project repo, the cousin command [`statareport_set_local_data_root`](statareport_set_local_data_root.md)
+caches a separate root in `__statareport_local_data_root__` which
+[`statareport_add_data`](statareport_add_data.md)`,` `local` resolves against. The two
+caches coexist independently.
+
 
 ## Examples
 
@@ -40,7 +46,7 @@ globals.
 
 ## Also see
 
-[`statareport_add_data`](statareport_add_data.md), [`statareport_confirm_data`](statareport_confirm_data.md), [`here`](here.md), [`statareport_set_paths`](statareport_set_paths.md)
+[`statareport_set_local_data_root`](statareport_set_local_data_root.md), [`statareport_add_data`](statareport_add_data.md), [`statareport_confirm_data`](statareport_confirm_data.md), [`here`](here.md), [`statareport_set_paths`](statareport_set_paths.md)
 
 ---
 

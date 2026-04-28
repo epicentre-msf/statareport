@@ -24,9 +24,15 @@ cache whenever it receives a relative path, mirroring the role of
 {help statareport_confirm_data} to audit the resulting {cmd:$data_*}
 globals.{p_end}
 
+{pstd}For derived / intermediate datasets that live {it:inside} the
+project repo, the cousin command {help statareport_set_local_data_root}
+caches a separate root in {cmd:__statareport_local_data_root__} which
+{help statareport_add_data}{cmd:, local} resolves against. The two
+caches coexist independently.{p_end}
+
 {title:Examples}
 {phang}{cmd:. statareport_set_data_root, path("$dir_datasets")}{p_end}
 {phang}{cmd:. statareport_set_data_root, clear}{p_end}
 
 {title:Also see}
-{pstd}{help statareport_add_data}, {help statareport_confirm_data}, {help here}, {help statareport_set_paths}{p_end}
+{pstd}{help statareport_set_local_data_root}, {help statareport_add_data}, {help statareport_confirm_data}, {help here}, {help statareport_set_paths}{p_end}

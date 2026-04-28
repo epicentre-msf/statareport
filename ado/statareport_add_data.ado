@@ -4,6 +4,7 @@
 *!     statareport_add_data, name(preselection) path("preselection_visit.dta")
 *!     statareport_add_data, name(meddra)       path("Meddra/codes.dta") raw
 *!     statareport_add_data, name(local_core)   path("local_datasets/core.dta") project optional
+*!     statareport_add_data, name(core)         path("core.dta") local optional
 *!
 *! Resolution rules (mutually exclusive):
 *!   default   : join relative paths with the Mata cache set by
@@ -11,14 +12,19 @@
 *!   project   : join relative paths with the Mata cache set by
 *!               `here' (__here_root__). Useful for derived datasets that
 *!               live inside the project repo.
+*!   local     : join relative paths with the Mata cache set by
+*!               statareport_set_local_data_root
+*!               (__statareport_local_data_root__). Use this when the
+*!               local data folder is set once and many derived datasets
+*!               share it -- callers then pass bare filenames.
 *!   raw       : use the path verbatim, no prepending at all. Useful for
 *!               paths that already resolve via user-defined globals such
 *!               as $dir_onedrive.
 *!   root(...) : one-off override of the default root.
 *!
 *! Absolute paths are always used verbatim regardless of which option you
-*! pick, so you can sprinkle `raw' / `project' liberally without breaking
-*! lines that pass a fully-qualified path.
+*! pick, so you can sprinkle `raw' / `project' / `local' liberally without
+*! breaking lines that pass a fully-qualified path.
 *!
 *! File-existence behaviour:
 *!   - By default a missing file is flagged with a `display as error' line
@@ -33,7 +39,7 @@ capture program drop statareport_add_data
 program define statareport_add_data, rclass
     version 15
     syntax , NAME(string) PATH(string) ///
-        [ROOT(string) RAW PROject OPTional QUIet]
+        [ROOT(string) RAW PROject LOCal OPTional QUIet]
 
     // Validate name() -- it becomes part of a Stata global, so reject
     // anything that would break Stata's name parser.
@@ -44,9 +50,10 @@ program define statareport_add_data, rclass
     }
 
     // Mutually exclusive resolution flags -----------------------------------
-    local n_modes = ("`raw'" != "") + ("`project'" != "") + (`"`root'"' != "")
+    local n_modes = ("`raw'" != "") + ("`project'" != "") + ("`local'" != "") + (`"`root'"' != "")
     if (`n_modes' > 1) {
-        display as error "statareport_add_data: raw, project, and root() are mutually exclusive"
+        display as error ///
+            "statareport_add_data: raw, project, local, and root() are mutually exclusive"
         exit 198
     }
 
@@ -71,6 +78,14 @@ program define statareport_add_data, rclass
         capture mata: st_local("chosen_root", __here_root__)
         if (`"`chosen_root'"' == "") {
             display as error "statareport_add_data: project option set but `here' has not run"
+            exit 459
+        }
+    }
+    else if ("`local'" != "") {
+        capture mata: st_local("chosen_root", __statareport_local_data_root__)
+        if (`"`chosen_root'"' == "") {
+            display as error ///
+                "statareport_add_data: local option set but statareport_set_local_data_root has not been called"
             exit 459
         }
     }
@@ -105,6 +120,6 @@ program define statareport_add_data, rclass
 
     return local name    `"`name'"'
     return local path    `"`resolved'"'
-    return local mode    "`=cond("`raw'"!="","raw",cond("`project'"!="","project",cond(`"`root'"'!="","root","data")))'"
+    return local mode    "`=cond("`raw'"!="","raw",cond("`project'"!="","project",cond("`local'"!="","local",cond(`"`root'"'!="","root","data"))))'"
     return scalar missing = `missing'
 end

@@ -102,6 +102,7 @@ nav:
       - statareport_add_programs: commands/statareport_add_programs.md
       - statareport_set_paths: commands/statareport_set_paths.md
       - statareport_set_data_root: commands/statareport_set_data_root.md
+      - statareport_set_local_data_root: commands/statareport_set_local_data_root.md
       - statareport_add_data: commands/statareport_add_data.md
       - statareport_confirm_data: commands/statareport_confirm_data.md
       - lastexport: commands/lastexport.md
