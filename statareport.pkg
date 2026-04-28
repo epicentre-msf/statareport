@@ -2,7 +2,7 @@ v 3
 d 'statareport': Custom analysis utilities for your project
 d Author: statareport contributors
 d Requires: Stata 15 or newer
-d Distribution-Date: 20 Apr 2026
+d Distribution-Date: 28 Apr 2026
 f ado/statareport__apply_order.ado
 f ado/statareport__read_file.ado
 f ado/statareport__writenone.ado
