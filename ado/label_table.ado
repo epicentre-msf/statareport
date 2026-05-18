@@ -66,9 +66,11 @@ program label_table
     // this, Stata silently keeps the master's value and every Excel label
     // edit is ignored. The expanded keep() list is required because update
     // creates extra _merge codes (match_update, match_conflict) that the
-    // bare keep(master match) would drop.
+    // bare keep(master match) would drop. `using' is kept too so Excel-only
+    // rows survive the merge and are filtered by the `order' rule below
+    // (drop iff `order' is blank), not unconditionally dropped here.
     merge 1:1 id using "`labels_dta'", ///
-        keep(master match match_update match_conflict) update replace nogenerate
+        keep(master match match_update match_conflict using) update replace nogenerate
 
     if ("`drop_value'" != "") {
         capture confirm variable value
