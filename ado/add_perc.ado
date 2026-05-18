@@ -89,7 +89,6 @@ program add_perc
 
         drop `v'
         rename `result' `v'
-        format `v' %-s
 
         if ("`vlabel'" != "") {
             label variable `v' "`vlabel'"
