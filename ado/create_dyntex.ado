@@ -63,7 +63,7 @@ program create_dyntex
     if ("`nbinput'" != "") {
         quietly keep in 1/`nbinput'
     }
-    quietly drop if missing(InputID) | Include == ""
+    quietly drop if missing(InputID)
     quietly drop if Include == "no"
 
     if (_N == 0) {
