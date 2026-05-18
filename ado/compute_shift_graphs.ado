@@ -29,7 +29,7 @@ program define compute_shift_graphs
     local measure `varlist'
 
     confirm numeric variable `evariable'
-    confirm numeric variable `idvariable'
+    confirm variable `idvariable'
     confirm file "`configfile'"
 
     * Ensure output directory exists (ignore if already created)

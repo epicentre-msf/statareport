@@ -98,11 +98,12 @@ program knit, rclass
     }
     else {
         local defaults_file "`defaults_tmp'"
-        knit__write_defaults using("`using'") output("`output'") defaults("`defaults_file'") ///
-            reference("`reference'") first("`first'") ///
+        knit__write_defaults using `"`using'"', ///
+            output(`"`output'"') defaults(`"`defaults_file'"') ///
+            reference(`"`reference'"') first(`"`first'"') ///
             prepend(`"`prepend'"') in_header(`"`in_header'"') ///
             filters(`"`filters'"') ///
-            from("`from'") to("`to'") ///
+            from(`"`from'"') to(`"`to'"') ///
             toc(`include_toc') number(`include_num')
     }
 
