@@ -3,10 +3,16 @@
 *! Writes the set of globals that the render pipeline consumes:
 *!   $file_dyntex          $file_input            $file_header
 *!   $file_output          $file_reference        $file_default_options
-*!   $file_label           $file_graph_opts
+*!   $file_label           $file_graph_opts       $file_filters
 *!
-*! Each global is derived from a naming convention:
+*! Each path global is derived from a naming convention:
 *!   <root>/<folder>/<prefix>[-<variant>]-<role>.<ext>
+*!
+*! $file_filters is not variant-aware -- the same Lua filter pool is
+*! reused across the main report and any variant (e.g. listings). It
+*! defaults to the three filters shipped by statareport under
+*! <root>/input_md/ (page-orientation.lua, table-breaks.lua,
+*! list-tables.lua) and a warning is printed for each missing file.
 *!
 *! Variants support the "main vs listings" split used in the project
 *! workflow: call the command once with variant("") and again with
@@ -21,7 +27,8 @@
 *! ---------
 *! Individual files can be overridden via options named after the global
 *! suffix: dyntex(), input(), header(), output(), reference(), defaults(),
-*! label(), graphopts(). Anything not overridden follows the convention.
+*! label(), graphopts(), filters(). Anything not overridden follows the
+*! convention.
 
 capture program drop statareport_set_paths
 program define statareport_set_paths, rclass
@@ -31,6 +38,7 @@ program define statareport_set_paths, rclass
         [DATE(string) ROOT(string) VARIANT(string) ///
          DYNTEX(string) INPUT(string) HEADER(string) OUTPUT(string) ///
          REFERENCE(string) DEFAULTS(string) LABEL(string) GRAPHOPTS(string) ///
+         FILTers(string) ///
          QUIet]
 
     // -------------------------------------------------------------------
@@ -124,6 +132,37 @@ program define statareport_set_paths, rclass
     global file_graph_opts`gsuf'      "`_graphopts'"
 
     // -------------------------------------------------------------------
+    // Pandoc Lua filter pool ($file_filters).
+    //
+    // Variant-agnostic: the same filter list serves the main report and
+    // every variant, so only write it on the non-variant call (gsuf="").
+    // Explicit filters() bypasses the default + the missing-file warning.
+    // A missing default is reported (not fatal) so a misconfigured project
+    // surfaces here rather than as a cryptic pandoc error 3 stages later.
+    // -------------------------------------------------------------------
+    local _filters ""
+    if ("`gsuf'" == "") {
+        if (`"`filters'"' != "") {
+            local _filters `"`filters'"'
+        }
+        else {
+            local _fp_page  "`root'/input_md/page-orientation.lua"
+            local _fp_break "`root'/input_md/table-breaks.lua"
+            local _fp_list  "`root'/input_md/list-tables.lua"
+            local _filters `""`_fp_page'" "`_fp_break'" "`_fp_list'""'
+
+            foreach fp in "`_fp_page'" "`_fp_break'" "`_fp_list'" {
+                capture confirm file "`fp'"
+                if (_rc) {
+                    display as error ///
+                        "statareport_set_paths: WARNING -- Lua filter missing: `fp'"
+                }
+            }
+        }
+        global file_filters `"`_filters'"'
+    }
+
+    // -------------------------------------------------------------------
     // Return the same values so callers can script without globals.
     // -------------------------------------------------------------------
     return local root      "`root'"
@@ -136,6 +175,7 @@ program define statareport_set_paths, rclass
     return local defaults  "`_defaults'"
     return local label     "`_label'"
     return local graphopts "`_graphopts'"
+    return local filters   `"`_filters'"'
 
     if ("`quiet'" == "") {
         display as text "statareport_set_paths: " as result "`stem'" ///
@@ -148,5 +188,10 @@ program define statareport_set_paths, rclass
         display as text "  $file_default_options`gsuf' = " as result "${file_default_options`gsuf'}"
         display as text "  $file_label`gsuf'           = " as result "${file_label`gsuf'}"
         display as text "  $file_graph_opts`gsuf'      = " as result "${file_graph_opts`gsuf'}"
+        if ("`gsuf'" == "") {
+            // Escape \$ on the LHS: $file_filters expands to a quoted
+            // list, which would corrupt the surrounding string literal.
+            display as text "  \$file_filters              = " as result `"${file_filters}"'
+        }
     }
 end

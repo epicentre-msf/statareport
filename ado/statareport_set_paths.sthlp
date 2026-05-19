@@ -23,6 +23,7 @@
 {synopt:{cmd:defaults(}{it:string}{cmd:)}}override the auto-derived {cmd:$file_default_options} path{p_end}
 {synopt:{cmd:label(}{it:string}{cmd:)}}override the auto-derived {cmd:$file_label} path{p_end}
 {synopt:{cmd:graphopts(}{it:string}{cmd:)}}override the auto-derived {cmd:$file_graph_opts} path{p_end}
+{synopt:{cmdab:filt:ers(}{it:string}{cmd:)}}override {cmd:$file_filters} (space-separated quoted Lua filter paths){p_end}
 {synopt:{cmdab:qui:et}}suppress the summary message printed to the Results window{p_end}
 {synoptline}
 {p2colreset}{...}
@@ -42,10 +43,14 @@ fills in the full path family that {help knit}, {help create_dyntex}, and
 {phang2}{cmd:$file_default_options}{col 32}{cmd:<root>/input_md/default_options[-<variant>].yaml}{p_end}
 {phang2}{cmd:$file_label}{col 32}{cmd:<root>/input_tables/tables_labels[-<variant>].xlsx}{p_end}
 {phang2}{cmd:$file_graph_opts}{col 32}{cmd:<root>/input_tables/shift_graph_input[-<variant>].xlsx}{p_end}
+{phang2}{cmd:$file_filters}{col 32}{cmd:<root>/input_md/{page-orientation,table-breaks,list-tables}.lua}{p_end}
 
 {pstd}Here {cmd:<stem>} is {cmd:<prefix>} or {cmd:<prefix>-<variant>}. When
 {opt variant()} is non-empty the globals are suffixed with {cmd:_<variant>}
-so main and listings can coexist.{p_end}
+so main and listings can coexist. {cmd:$file_filters} is the one global
+that is variant-agnostic: it is only written on the {cmd:variant("")} call
+and reused across variants. Each default filter path is checked on disk
+and a warning is printed if any of them are missing.{p_end}
 
 {pstd}Individual paths can always be overridden via the dedicated options
 (e.g. {cmd:label("my_custom_labels.xlsx")}); anything not overridden
@@ -62,8 +67,10 @@ top of your master do-file to seed it.{p_end}
 {pstd}{cmd:statareport_set_paths} returns each emitted path under
 {cmd:r(root)}, {cmd:r(variant)}, {cmd:r(dyntex)}, {cmd:r(input)},
 {cmd:r(header)}, {cmd:r(output)}, {cmd:r(reference)}, {cmd:r(defaults)},
-{cmd:r(label)}, and {cmd:r(graphopts)} so callers that prefer locals over
-globals can consume them directly.{p_end}
+{cmd:r(label)}, {cmd:r(graphopts)}, and {cmd:r(filters)} so callers that
+prefer locals over globals can consume them directly. {cmd:r(filters)} is
+empty on variant calls (the filter pool is only written on the
+{cmd:variant("")} call).{p_end}
 
 {title:Examples}
 {pstd}Main report only:{p_end}

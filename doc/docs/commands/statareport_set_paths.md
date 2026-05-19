@@ -27,6 +27,7 @@
 - `defaults(`*string*`)` — override the auto-derived `$file_default_options` path
 - `label(`*string*`)` — override the auto-derived `$file_label` path
 - `graphopts(`*string*`)` — override the auto-derived `$file_graph_opts` path
+- **`filt`**`ers(`*string*`)` — override `$file_filters` (space-separated quoted Lua filter paths)
 - **`qui`**`et` — suppress the summary message printed to the Results window
 
 ---
@@ -49,10 +50,14 @@ fills in the full path family that [`knit`](knit.md), [`create_dyntex`](create_d
     `$file_default_options`{col 32}`<root>/input_md/default_options[-<variant>].yaml`
     `$file_label`{col 32}`<root>/input_tables/tables_labels[-<variant>].xlsx`
     `$file_graph_opts`{col 32}`<root>/input_tables/shift_graph_input[-<variant>].xlsx`
+    `$file_filters`{col 32}`<root>/input_md/{page-orientation,table-breaks,list-tables`.lua}
 
 Here `<stem>` is `<prefix>` or `<prefix>-<variant>`. When
 `variant()` is non-empty the globals are suffixed with `_<variant>`
-so main and listings can coexist.
+so main and listings can coexist. `$file_filters` is the one global
+that is variant-agnostic: it is only written on the `variant("")` call
+and reused across variants. Each default filter path is checked on disk
+and a warning is printed if any of them are missing.
 
 Individual paths can always be overridden via the dedicated options
 (e.g. `label("my_custom_labels.xlsx")`); anything not overridden
@@ -73,8 +78,10 @@ top of your master do-file to seed it.
 `statareport_set_paths` returns each emitted path under
 `r(root)`, `r(variant)`, `r(dyntex)`, `r(input)`,
 `r(header)`, `r(output)`, `r(reference)`, `r(defaults)`,
-`r(label)`, and `r(graphopts)` so callers that prefer locals over
-globals can consume them directly.
+`r(label)`, `r(graphopts)`, and `r(filters)` so callers that
+prefer locals over globals can consume them directly. `r(filters)` is
+empty on variant calls (the filter pool is only written on the
+`variant("")` call).
 
 
 ## Examples

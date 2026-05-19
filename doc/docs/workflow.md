@@ -109,10 +109,15 @@ reportdo 06-safety
 
 ```stata
 global var_sheet_lab "Labels"
-global file_filters `""$dir_input_md/page-orientation.lua" "$dir_input_md/table-breaks.lua" "$dir_input_md/list-tables.lua""'
 
 statareport_render
 ```
+
+`statareport_set_paths` (called earlier in section 5) initialises
+`$file_filters` with the three Lua filters shipped under `input_md/`
+and warns if any are missing. Override the list by passing
+`filters("...")` to `statareport_set_paths` or `statareport_render`,
+or by reassigning `$file_filters` before the render call.
 
 One call drives [`create_dyntex`](commands/create_dyntex.md) →
 `dyntext` → [`knit`](commands/knit.md). See

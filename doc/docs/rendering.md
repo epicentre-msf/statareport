@@ -125,8 +125,9 @@ statareport_render, variant("listings") toc(no)
 | Symptom | Likely cause |
 |---------|--------------|
 | `pandoc: cannot find file` | Wrong `$file_input` / `$file_header`. Check `statareport_render`'s `[3/3] knit ->` line. |
-| Tables not populated in docx | `list-tables.lua` missing from `filters()`. Add `$dir_input_md/list-tables.lua`. |
-| Landscape page not switching | `page-orientation.lua` missing from `filters()`. |
+| Multi-line cells render as separate paragraphs | `table-breaks.lua` missing from `$file_filters`. `statareport_set_paths` prints a warning on the missing file; restore it under `$dir_input_md/`. |
+| Tables not populated in docx | `list-tables.lua` missing from `$file_filters` (look for the `statareport_set_paths` warning). |
+| Landscape page not switching | `page-orientation.lua` missing from `$file_filters` (look for the `statareport_set_paths` warning). |
 | `option include() not allowed` | Old help-file example — use `prepend()` instead. |
 | `option default() specified but file not found` | The YAML path was explicit but the file doesn't exist. Either supply a real file or omit `default()` to let knit auto-generate. |
 
