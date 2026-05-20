@@ -7,7 +7,9 @@ Options
 - label_file(): Excel workbook containing the labels (required).
 - tab_id(): worksheet name that holds the id/label mapping (required).
 - label_name(): optional note for the `label` column.
-- value_name(): optional note propagated to all `value*` columns.
+- value_name(): optional note applied to the `value` column only. Other
+  `value*` columns (value1, value2, ... from a `by()` split) keep their own
+  group labels.
 - drop_value(): drop rows whose `value` matches the provided string (case
   sensitive after trimming).
 
@@ -112,9 +114,13 @@ program label_table
     }
 
     if ("`value_name'" != "") {
-        unab valuevars : value*
-        foreach v of local valuevars {
-            capture note `v': `value_name'
+        // Only the `value' column carries the generic value label. Any other
+        // value* columns (value1, value2, ...) come from a `by()' split in
+        // quant/qual and already carry their own group-specific labels, so
+        // they must not be overwritten with the generic value_name.
+        capture confirm variable value
+        if (!_rc) {
+            capture note value: `value_name'
         }
     }
 

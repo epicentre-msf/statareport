@@ -10,6 +10,14 @@ Inputs
 
 The program saves both a Stata graph ({cmd:.gph}) and a PNG using the supplied
 output directory and suffix.
+
+Output sizing
+-------------
+- {opt width()} sets the exported PNG width in pixels (default 2400). Larger
+  values give a crisper image; the height is derived from the aspect ratio so
+  the picture is never distorted.
+- {opt xsize()} / {opt ysize()} set the graph aspect ratio in inches
+  (default 7.5 x 4.5).
 */
 
 capture program drop compute_shift_graphs
@@ -23,7 +31,8 @@ program define compute_shift_graphs
         IDvariable(varname) ///
         OUTputdir(string) ///
         SUFfix(string) ///
-        CONFigfile(string)
+        CONFigfile(string) ///
+        [ WIDTH(integer 2400) XSize(real 7.5) YSize(real 4.5) ]
 
     marksample touse, novarlist
     local measure `varlist'
@@ -97,24 +106,32 @@ program define compute_shift_graphs
         local uln_str = string(`uln', "%9.1f")
         local diag_max = `maxx' * 1.068
 
+        * Colour for the ULN label/reference lines (colour-blind friendly blue)
+        local uln_color "0 114 178"
+
         twoway ///
             (scatter `measure'_ev `measure', sort ///
                 mlcolor(black%68) mfcolor(black%60) msize(2-pt) msymbol(smcircle) ///
-                text(`uln' `diag_max' "ULN" "`uln_str' `unit'", place(n) size(2rs) color(black)) ///
+                text(`uln' `diag_max' "ULN" "`uln_str' `unit'", place(n) size(2rs) color("`uln_color'")) ///
                 text(`lln' `diag_max' "LLN" "`lln_str' `unit'", place(n) size(2rs) color(black)) ///
                 text(`diag_max' `lln' "LLN" "`lln_str' `unit'", place(ne) size(2rs) color(black)) ///
-                text(`diag_max' `uln' "ULN" "`uln_str' `unit'", place(ne) size(2rs) color(black)) ) ///
+                text(`diag_max' `uln' "ULN" "`uln_str' `unit'", place(ne) size(2rs) color("`uln_color'")) ) ///
             (function y = x, range(`minx' `diag_max') lcolor(gs8) lwidth(0.2)), ///
-            yline(`lln' `uln', lwidth(0.168) lcolor(gs12) lpattern(dash)) ///
-            xline(`lln' `uln', lwidth(0.168) lcolor(gs12) lpattern(dash)) ///
+            yline(`lln', lwidth(0.168) lcolor(gs12) lpattern(dash)) ///
+            yline(`uln', lwidth(0.168) lcolor("`uln_color'") lpattern(dash)) ///
+            xline(`lln', lwidth(0.168) lcolor(gs12) lpattern(dash)) ///
+            xline(`uln', lwidth(0.168) lcolor("`uln_color'") lpattern(dash)) ///
             ytitle("`lname' at `eval_label' (`unit')", size(vsmall) color(black)) ///
             ylabel(, labsize(vsmall) nogrid glcolor(none)) ///
             xtitle("`lname' at `base_label' (`unit')", size(vsmall) color(black)) ///
             xlabel(, labsize(vsmall) tlcolor(black) nogrid) ///
             legend(off) graphregion(fcolor(white) lcolor(white)) ///
-            plotregion(fcolor(white) ifcolor(white))
+            plotregion(fcolor(white) ifcolor(white)) ///
+            xsize(`xsize') ysize(`ysize')
     restore
 
     graph save "`outputdir'/`measure'_`evalue'_`suffix'", replace
-    graph export "`outputdir'/`measure'_`evalue'_`suffix'.png", as(png) replace
+    * Only width() is passed so the export height is derived from the
+    * xsize()/ysize() aspect ratio above, keeping the PNG undistorted.
+    graph export "`outputdir'/`measure'_`evalue'_`suffix'.png", as(png) width(`width') replace
 end
