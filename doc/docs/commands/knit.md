@@ -40,6 +40,7 @@
 - `toc(`*string*`)` — table of contents toggle (`yes` (default) or `no`)
 - **`number_s`**`ec(`*string*`)` — section numbering toggle (`yes` (default) or `no`)
 - **`pan`**`docloc(`*string*`)` — explicit path to the Pandoc executable
+- **`nofix`**`sections` — do not propagate header/footer references into orientation section breaks
 
 ---
 
@@ -115,6 +116,16 @@ binary. When omitted the command asks the OS for the pandoc location
 (`command -v pandoc` on macOS/Linux or `where pandoc` on Windows),
 with Homebrew fallbacks on macOS (`/opt/homebrew/bin/pandoc`,
 `/usr/local/bin/pandoc`).
+
+> `nofixsections` disables the docx section-break post-processing. By default,
+when the output is a `.docx`, knit copies the document's
+`headerReference`/`footerReference` (from the body-level `sectPr`) into the
+section breaks inserted by `page-orientation.lua` for Landscape/Portrait
+switches. Without this, Pandoc leaves those mid-document sections with no
+header/footer reference and Word drops the footer and page numbering on every
+section but the last. The step uses `pandoc lua` (no extra dependency), is a
+no-op when there is nothing to copy (e.g. no reference document, or one without
+a footer), and is safe to re-run.
 
 
 ## Examples

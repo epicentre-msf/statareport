@@ -38,7 +38,7 @@ program knit, rclass
     syntax using/ , [ SAVing(string) REPlace DEFAULT(string) REFERENCE(string) ///
         FIRST(string) PREpend(string) IN_header(string) FILTers(string) ///
         FROM(string) TO(string) ///
-        TOC(string) NUMBER_sec(string) PANdocloc(string) ]
+        TOC(string) NUMBER_sec(string) PANdocloc(string) NOFIXsections ]
 
     confirm file "`using'"
 
@@ -127,12 +127,81 @@ program knit, rclass
         exit `rc'
     }
 
-    display as result "Rendered `using' to `output'"
+    // Post-process docx: orientation section breaks inserted by
+    // page-orientation.lua carry page size/margins but no header/footer
+    // reference, so Word drops footers/page numbers on every section but the
+    // last. Copy the document's header/footer references into those sections.
+    if ("`nofixsections'" == "") {
+        local lc_out = lower(`"`output'"')
+        if (substr(`"`lc_out'"', -5, 5) == ".docx") {
+            knit__fix_sections, docx(`"`output'"') pandoc(`"`pandoc'"')
+        }
+    }
+
+    display as result "✅ --> Rendered `using' to `output'"
 
     return local output        `"`output'"'
     return local defaults_file `"`defaults_file'"'
     return local pandoc        `"`pandoc'"'
     return local input         `"`using'"'
+end
+
+// Patch a pandoc-generated .docx so that the section breaks inserted for
+// page-orientation changes inherit the document's header/footer references.
+//
+// Pandoc only writes the header/footer references into the final, body-level
+// <w:sectPr>. The orientation section marks injected mid-document carry page
+// size/margins but no reference, so Word shows no footer/page number on those
+// sections. This copies the body sectPr's <w:headerReference>/
+// <w:footerReference> elements into every inserted section that lacks them.
+//
+// The work is done by a short Lua program executed through `pandoc lua' (the
+// pandoc binary is already a hard dependency, so this needs no extra tools).
+// It is a no-op when there are no references to propagate (e.g. no reference
+// doc, or a reference doc without a footer) and is safe to run more than once.
+capture program drop knit__fix_sections
+program knit__fix_sections
+    version 15
+    syntax , DOCX(string) [ PANDOC(string) ]
+
+    if ("`pandoc'" == "") local pandoc "pandoc"
+
+    tempfile script
+    tempname fh
+    capture file close `fh'
+    file open `fh' using "`script'", write replace
+    file write `fh' `"local docx = arg[1]"' _n
+    file write `fh' `"if not docx then os.exit(0) end"' _n
+    file write `fh' `"local f = io.open(docx, "rb")"' _n
+    file write `fh' `"if not f then os.exit(0) end"' _n
+    file write `fh' `"local raw = f:read("a"); f:close()"' _n
+    file write `fh' `"local ok, archive = pcall(pandoc.zip.Archive, raw)"' _n
+    file write `fh' `"if not ok or not archive then os.exit(0) end"' _n
+    file write `fh' `"local idx, xml"' _n
+    file write `fh' `"for i, e in ipairs(archive.entries) do"' _n
+    file write `fh' `"  if e.path == "word/document.xml" then idx = i; xml = e:contents() end"' _n
+    file write `fh' `"end"' _n
+    file write `fh' `"if not xml then os.exit(0) end"' _n
+    file write `fh' `"local body = xml:match("(<w:sectPr[ >].-</w:sectPr>)%s*</w:body>")"' _n
+    file write `fh' `"if not body then os.exit(0) end"' _n
+    file write `fh' `"local refs = {}"' _n
+    file write `fh' `"for r in body:gmatch("<w:headerReference.->") do refs[#refs+1] = r end"' _n
+    file write `fh' `"for r in body:gmatch("<w:footerReference.->") do refs[#refs+1] = r end"' _n
+    file write `fh' `"if #refs == 0 then os.exit(0) end"' _n
+    file write `fh' `"local refstr = table.concat(refs)"' _n
+    file write `fh' `"local n, m = 0, 0"' _n
+    file write `fh' `"xml, n = xml:gsub("(<w:sectPr>)(%s*<w:pgSz)", function(a, b) return a .. refstr .. b end)"' _n
+    file write `fh' `"xml, m = xml:gsub("(<w:sectPr>)(%s*<w:type)", function(a, b) return a .. refstr .. b end)"' _n
+    file write `fh' `"if (n + m) == 0 then os.exit(0) end"' _n
+    file write `fh' `"archive.entries[idx] = pandoc.zip.Entry("word/document.xml", xml)"' _n
+    file write `fh' `"local wf = io.open(docx, "wb"); wf:write(archive:bytestring()); wf:close()"' _n
+    file write `fh' `"io.stderr:write("statareport: restored header/footer on " .. (n + m) .. " section break(s)\n")"' _n
+    file close `fh'
+
+    capture noisily !"`pandoc'" lua "`script'" "`docx'"
+    if (_rc) {
+        display as text "knit: note -- could not post-process section headers/footers (rc=`=_rc'); document left as produced by pandoc"
+    }
 end
 
 // Write the Pandoc defaults YAML that `knit` feeds to pandoc via --defaults.

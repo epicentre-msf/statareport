@@ -11,6 +11,7 @@
 **`tab_d`**`ir(`*string*`)`
 **`fig_d`**`ir(`*string*`)`
 [**`nbin`**`put(`*numlist*`)`]
+[**`qui`**`et`]
 
 
 
@@ -24,6 +25,7 @@
 - **`tab_d`**`ir(`*string*`)` — directory containing `.dta` table datasets (required)
 - **`fig_d`**`ir(`*string*`)` — directory containing PNG figure files (required)
 - **`nbin`**`put(`*numlist*`)` — limit processing to the first *N* rows of the label sheet
+- **`qui`**`et` — suppress the per-item progress messages while the file is built
 
 ---
 
@@ -59,6 +61,12 @@ referenced by the **InputID** column.
 
 > `nbinput(`*numlist*`)` restricts the command to the first
 *N* rows of the label sheet.  Useful for debugging a subset of outputs.
+
+> `quiet` suppresses the informational progress messages (sections,
+subsections, figures, tables, page-mode changes and the completion note) and
+the incidental import/save notes printed while the DynTex file is built. Error
+messages are always shown. [`statareport_render`](statareport_render.md) always
+builds the DynTex file with this option.
 
 
 ## Examples

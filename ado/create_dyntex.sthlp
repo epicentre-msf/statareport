@@ -20,6 +20,7 @@
 {synopt:{cmdab:tab_d:ir(}{it:string}{cmd:)}}directory containing {cmd:.dta} table datasets (required){p_end}
 {synopt:{cmdab:fig_d:ir(}{it:string}{cmd:)}}directory containing PNG figure files (required){p_end}
 {synopt:{cmdab:nbin:put(}{it:numlist}{cmd:)}}limit processing to the first {it:N} rows of the label sheet{p_end}
+{synopt:{cmdab:qui:et}}suppress the per-item progress messages while the file is built{p_end}
 {synoptline}
 {p2colreset}{...}
 
@@ -50,6 +51,12 @@ referenced by the {bf:InputID} column.
 
 {phang}{cmd:nbinput(}{it:numlist}{cmd:)} restricts the command to the first
 {it:N} rows of the label sheet.  Useful for debugging a subset of outputs.
+
+{phang}{cmd:quiet} suppresses the informational progress messages (sections,
+subsections, figures, tables, page-mode changes and the completion note) and
+the incidental import/save notes printed while the DynTex file is built. Error
+messages are always shown. {help statareport_render} always builds the DynTex
+file with this option.
 
 {title:Examples}
 {phang}{cmd:. create_dyntex using "input_tables/labels.xlsx", dyntex_file("output_md/report.txt") label_sheet("Tables") tab_dir("output_tables") fig_dir("output_figures")}{p_end}

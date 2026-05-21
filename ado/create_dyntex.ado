@@ -13,15 +13,25 @@ Required columns in the label sheet:
 
 The command writes a DynTex file that Stata's dynamic document machinery can
 consume.
+
+Option {opt quiet} suppresses the per-item progress messages (sections,
+subsections, figures, tables and the completion note) printed while the DynTex
+file is built. Errors are always shown.
 */
 
 capture program drop create_dyntex
 program create_dyntex
     version 15
     syntax using/ , DYNTEX_file(string) LABEL_sheet(string) TAB_dir(string) ///
-        FIG_dir(string) [NBINput(numlist > 0 integer max=1)]
+        FIG_dir(string) [NBINput(numlist > 0 integer max=1) QUIet]
 
     confirm file "`using'"
+
+    // Whether to print per-item progress messages (suppressed by quiet).
+    local verbose = ("`quiet'" == "")
+    // Prefix for the noisy data steps (import/save) so quiet is truly silent.
+    local qui ""
+    if ("`quiet'" != "") local qui "quietly"
 
     // Prepare destination file ------------------------------------------------
     capture file close _dyntex
@@ -30,7 +40,7 @@ program create_dyntex
 
     // Import label sheet ------------------------------------------------------
     tempfile labels
-    import excel using "`using'", sheet("`label_sheet'") firstrow clear
+    `qui' import excel using "`using'", sheet("`label_sheet'") firstrow clear
 
     foreach required in InputID Include Caption Figure FootNote Section Subsection DisplayMode {
         capture confirm variable `required'
@@ -72,7 +82,7 @@ program create_dyntex
         exit 498
     }
 
-    save "`labels'", replace
+    `qui' save "`labels'", replace
 
     // Emit content ------------------------------------------------------------
     local current_section ""
@@ -110,25 +120,25 @@ program create_dyntex
         if ("`newmode'" != "" & "`newmode'" != "`current_mode'") {
             file write _dyntex "\Begin`newmode'" _n _n
             local current_mode "`newmode'"
-            display as result "▶️ Page mode changed to `current_mode'"
+            if (`verbose') display as result "▶️ Page mode changed to `current_mode'"
         }
 
         // Section headers ------------------------------------------------------
         if ("`section'" != "" & "`section'" != "`current_section'") {
             local current_section "`section'"
             file write _dyntex "# `current_section'" _n _n
-            display as result "Section: `current_section'"
+            if (`verbose') display as result "Section: `current_section'"
         }
 
         if ("`subsection'" != "" & "`subsection'" != "`current_subsection'") {
             local current_subsection "`subsection'"
             file write _dyntex "## `current_subsection'" _n _n
-            display as result "  Subsection: `current_subsection'"
+            if (`verbose') display as result "  Subsection: `current_subsection'"
         }
 
         // Content --------------------------------------------------------------
         if (substr("`isfigure'", 1, 1) == "y") {
-            display as result "  Figure `id'"
+            if (`verbose') display as result "  Figure `id'"
             file write _dyntex `"::: {custom-style="center"}"' _n
             file write _dyntex "![`caption_clean'](`fig_dir'/`id'.png)" _n _n
             file write _dyntex ":::" _n _n
@@ -137,7 +147,7 @@ program create_dyntex
             local footopt ""
             if ("`footnote_clean'" != "") local footopt `" footnote("`footnote_clean'")"'
 
-            display as result "  Table `id'"
+            if (`verbose') display as result "  Table `id'"
             file write _dyntex "<<dd_do: nocommands>>" _n
             file write _dyntex `"quietly use "`tab_dir'/`id'.dta", clear"' _n
             file write _dyntex `" capture kable, space(90) cap("`caption_clean'")`footopt' out("temp.md")"' _n
@@ -157,5 +167,5 @@ program create_dyntex
     }
 
     file close _dyntex
-    display as result "✅ Created dyntex instructions in `dyntex_file'"
+    if (`verbose') display as result "✅ Created dyntex instructions in `dyntex_file'"
 end

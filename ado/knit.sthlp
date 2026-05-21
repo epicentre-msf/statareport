@@ -36,6 +36,7 @@
 {synopt:{cmd:toc(}{it:string}{cmd:)}}table of contents toggle ({cmd:yes} (default) or {cmd:no}){p_end}
 {synopt:{cmdab:number_s:ec(}{it:string}{cmd:)}}section numbering toggle ({cmd:yes} (default) or {cmd:no}){p_end}
 {synopt:{cmdab:pan:docloc(}{it:string}{cmd:)}}explicit path to the Pandoc executable{p_end}
+{synopt:{cmdab:nofix:sections}}do not propagate header/footer references into orientation section breaks{p_end}
 {synoptline}
 {p2colreset}{...}
 
@@ -106,6 +107,16 @@ binary. When omitted the command asks the OS for the pandoc location
 ({cmd:command -v pandoc} on macOS/Linux or {cmd:where pandoc} on Windows),
 with Homebrew fallbacks on macOS ({cmd:/opt/homebrew/bin/pandoc},
 {cmd:/usr/local/bin/pandoc}).
+
+{phang}{cmd:nofixsections} disables the docx section-break post-processing.
+By default, when the output is a {cmd:.docx}, knit copies the document's
+{cmd:headerReference}/{cmd:footerReference} (taken from the body-level
+{cmd:sectPr}) into the section breaks inserted by {help create_dyntex:page-orientation.lua} for
+Landscape/Portrait switches. Without this, Pandoc leaves those mid-document
+sections with no header/footer reference and Word drops the footer and page
+numbering on every section but the last. The step uses {cmd:pandoc lua} (no
+extra dependency), is a no-op when there is nothing to copy (e.g. no reference
+document, or a reference document without a footer), and is safe to re-run.
 
 {title:Examples}
 {phang}{cmd:. knit using "output_md/report.md", replace}{p_end}

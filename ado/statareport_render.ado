@@ -125,9 +125,11 @@ program define statareport_render, rclass
         if ("`quiet'" == "") display as text "[1/3] create_dyntex -> " as result `"`_dyntex'"'
         local nbopt ""
         if (`nbinput' >= 0) local nbopt `"nbinput(`nbinput')"'
+        // Always run create_dyntex quietly: render prints its own stage
+        // summary above, so the per-item progress lines are just noise here.
         create_dyntex using `"`_label'"', ///
             dyntex_file(`"`_dyntex'"') label_sheet(`"`_sheet'"') ///
-            tab_dir(`"`_tab_dir'"') fig_dir(`"`_fig_dir'"') `nbopt'
+            tab_dir(`"`_tab_dir'"') fig_dir(`"`_fig_dir'"') `nbopt' `quiet'
     }
 
     // -------------------------------------------------------------------
