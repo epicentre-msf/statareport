@@ -106,21 +106,20 @@ program define compute_shift_graphs
         local uln_str = string(`uln', "%9.1f")
         local diag_max = `maxx' * 1.068
 
-        * Colour for the ULN label/reference lines (colour-blind friendly blue)
-        local uln_color "0 114 178"
+        * Colour for the LLN/ULN labels and reference lines
+        * (colour-blind friendly blue)
+        local ref_color "0 114 178"
 
         twoway ///
             (scatter `measure'_ev `measure', sort ///
                 mlcolor(black%68) mfcolor(black%60) msize(2-pt) msymbol(smcircle) ///
-                text(`uln' `diag_max' "ULN" "`uln_str' `unit'", place(n) size(2rs) color("`uln_color'")) ///
-                text(`lln' `diag_max' "LLN" "`lln_str' `unit'", place(n) size(2rs) color(black)) ///
-                text(`diag_max' `lln' "LLN" "`lln_str' `unit'", place(ne) size(2rs) color(black)) ///
-                text(`diag_max' `uln' "ULN" "`uln_str' `unit'", place(ne) size(2rs) color("`uln_color'")) ) ///
+                text(`uln' `diag_max' "ULN" "`uln_str' `unit'", place(n) size(2rs) color("`ref_color'")) ///
+                text(`lln' `diag_max' "LLN" "`lln_str' `unit'", place(n) size(2rs) color("`ref_color'")) ///
+                text(`diag_max' `lln' "LLN" "`lln_str' `unit'", place(ne) size(2rs) color("`ref_color'")) ///
+                text(`diag_max' `uln' "ULN" "`uln_str' `unit'", place(ne) size(2rs) color("`ref_color'")) ) ///
             (function y = x, range(`minx' `diag_max') lcolor(gs8) lwidth(0.2)), ///
-            yline(`lln', lwidth(0.168) lcolor(gs12) lpattern(dash)) ///
-            yline(`uln', lwidth(0.168) lcolor("`uln_color'") lpattern(dash)) ///
-            xline(`lln', lwidth(0.168) lcolor(gs12) lpattern(dash)) ///
-            xline(`uln', lwidth(0.168) lcolor("`uln_color'") lpattern(dash)) ///
+            yline(`lln' `uln', lwidth(0.168) lcolor("`ref_color'") lpattern(dash)) ///
+            xline(`lln' `uln', lwidth(0.168) lcolor("`ref_color'") lpattern(dash)) ///
             ytitle("`lname' at `eval_label' (`unit')", size(vsmall) color(black)) ///
             ylabel(, labsize(vsmall) nogrid glcolor(none)) ///
             xtitle("`lname' at `base_label' (`unit')", size(vsmall) color(black)) ///
