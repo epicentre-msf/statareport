@@ -34,6 +34,18 @@ shows the same content.
 | [`generate_label_ids`](generate_label_ids.md) | sequential numeric labels for variables |
 | [`label_table`](label_table.md) | merge label metadata from Excel |
 
+## Data translation
+
+AI-assisted relabelling of a folder of `.dta` files. Export the labels to a flat
+file, translate the free text via the Anthropic API, then re-apply onto copies of
+the originals. The data are never altered — only labels, value labels and notes.
+
+| Command | Purpose |
+|---------|---------|
+| [`export_dta_labels`](export_dta_labels.md) | dump every `.dta`'s labels/notes to a pipe-delimited flat file |
+| [`translate_dta_labels`](translate_dta_labels.md) | translate the free-text fields via the Anthropic Messages API |
+| [`apply_dta_labels`](apply_dta_labels.md) | re-apply translated labels onto `.dta` copies in a sub-folder |
+
 ## Rendering
 
 | Command | Purpose |

@@ -116,6 +116,10 @@ nav:
       - convert_wisely: commands/convert_wisely.md
       - generate_label_ids: commands/generate_label_ids.md
       - label_table: commands/label_table.md
+    - Data translation:
+      - export_dta_labels: commands/export_dta_labels.md
+      - translate_dta_labels: commands/translate_dta_labels.md
+      - apply_dta_labels: commands/apply_dta_labels.md
     - Rendering:
       - statareport_render: commands/statareport_render.md
       - statareport_write_header: commands/statareport_write_header.md

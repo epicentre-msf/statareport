@@ -2,7 +2,7 @@ v 3
 d 'statareport': Custom analysis utilities for your project
 d Author: statareport contributors
 d Requires: Stata 15 or newer
-d Distribution-Date: 20260526
+d Distribution-Date: 20260603
 f ado/statareport__apply_order.ado
 f ado/statareport__read_file.ado
 f ado/statareport__writenone.ado
@@ -45,6 +45,9 @@ f ado/knit.ado
 f ado/label_table.ado
 f ado/qual.ado
 f ado/quant.ado
+f ado/export_dta_labels.ado
+f ado/translate_dta_labels.ado
+f ado/apply_dta_labels.ado
 f ado/add_perc.sthlp
 f ado/compute_ci.sthlp
 f ado/compute_shift_graphs.sthlp
@@ -75,5 +78,8 @@ f ado/reportdo.sthlp
 f ado/lastexport.sthlp
 f ado/statareport_setup_dirs.sthlp
 f ado/here.sthlp
+f ado/export_dta_labels.sthlp
+f ado/translate_dta_labels.sthlp
+f ado/apply_dta_labels.sthlp
 f examples/run_basic_report.do
 f examples/data/sample_patients.csv
