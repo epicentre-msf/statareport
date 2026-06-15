@@ -15,7 +15,7 @@ format: the format in the computation
 append: if the output file exists, do you want to append the current tabulation to previous data?
 by: compute qualitative values by a categorical varlist.
 
-fullresult, meanonly, medianonly: modify display for results (see details)
+fullresult, meanonly, medianonly, verticallayout: modify display for results (see details)
 
 mxsep, medsep, mxbrack, medbrack: separators for showing results (see details)
 
@@ -27,6 +27,11 @@ Display details
 Full results write result: N, median (IQR) (min/max)
 Mean only writes result: N, mean (SD)
 Median only writes result: Median (IQR) (min/max)
+Vertical layout stacks every statistic on its own line:
+    N
+    mean (SD)
+    median [Q1 ; Q3]
+    (min/max)
 
 Separators
 ---------------------------------
@@ -53,7 +58,7 @@ program quant
 
 	syntax varlist(min=1 numeric) [if] , OUTput(string) [append BY(varlist max=1) FULLresult MEANonly MEDianonly ///
 													FORMat(string) mxsep(string) medsep(string) MXBrack  ///
-													MEDPARenth ADDTOTal IDStart(integer 1) sumonly]
+													MEDPARenth ADDTOTal IDStart(integer 1) sumonly VERTIcallayout]
 
 
 	marksample touse, novarlist
@@ -116,8 +121,8 @@ program quant
 	if ("`format'" == ""){
 	   local format  "%9.1f"
 	}
-	local defaultmode = ("`fullresult'" == "") & ("`medianonly'" == "") & ("`meanonly'" == "") & ("`sumonly'" == "")
-	local requires_detail = ("`fullresult'" != "") | ("`medianonly'" != "") | `defaultmode'
+	local defaultmode = ("`fullresult'" == "") & ("`medianonly'" == "") & ("`meanonly'" == "") & ("`sumonly'" == "") & ("`verticallayout'" == "")
+	local requires_detail = ("`fullresult'" != "") | ("`medianonly'" != "") | ("`verticallayout'" != "") | `defaultmode'
 
 	// Precompute total sums to use as denominator when sumonly is requested
 	if ("`sumonly'" != "") {
@@ -219,6 +224,10 @@ program quant
 					local quantval =  "`med'  `medop'`p25' `medsep' `p75'`medcl' \n `mop'`min' `mxsep' `max'`mcl'"
 				}
 
+				if (("`verticallayout'" != "") & (!`emptydb')) {
+					local quantval = "`nobs' \n `mn' (`sd') \n `med' `medop'`p25' `medsep' `p75'`medcl' \n `mop'`min' `mxsep' `max'`mcl'"
+				}
+
 				local lbl: variable label `v'
 				quietly post `posthandle' ("`v'") ("`lbl'") ("`quantval'")
 			}
@@ -316,6 +325,10 @@ program quant
 			// Avoid regression with previous code
 			if (`defaultmode') {
 				local quantval =  "`fpart' `med'  `medop'`p25' `medsep' `p75'`medcl' \n `mop'`min' `mxsep' `max'`mcl'"
+			}
+
+			if (("`verticallayout'" != "") & (!`emptydb')) {
+				local quantval = "`nobs' \n `mn' (`sd') \n `med' `medop'`p25' `medsep' `p75'`medcl' \n `mop'`min' `mxsep' `max'`mcl'"
 			}
 
 			local lbl: variable label `v'

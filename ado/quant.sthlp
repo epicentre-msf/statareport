@@ -19,6 +19,7 @@
 {synopt:{cmd:meanonly}}display N, mean (SD){p_end}
 {synopt:{cmd:medianonly}}display median (IQR) and min/max{p_end}
 {synopt:{cmd:sumonly}}display sum and percentage of total sum{p_end}
+{synopt:{cmdab:verti:callayout}}stack N, mean (SD), median [IQR] and min/max on separate lines{p_end}
 {synopt:{cmd:format(}{it:string}{cmd:)}}numeric format for summaries (default {cmd:%9.1f}){p_end}
 {synopt:{cmd:idstart(}{it:integer}{cmd:)}}starting identifier value (default 1){p_end}
 {synopt:{cmd:addtotal}}include an overall Total column when {opt by()} is specified{p_end}
@@ -33,8 +34,10 @@
 {pstd}{cmd:quant} generates descriptive summaries for numeric variables and writes
 the results to a Stata dataset suitable for table production. The default
 display is N, median [IQR] (min/max). Alternative layouts are selected with
-{cmd:meanonly} (N, mean (SD)), {cmd:medianonly} (median [IQR], min/max), or
-{cmd:sumonly} (sum and percentage relative to the total sum). Output can be
+{cmd:meanonly} (N, mean (SD)), {cmd:medianonly} (median [IQR], min/max),
+{cmd:sumonly} (sum and percentage relative to the total sum), or
+{cmd:verticallayout} (N, mean (SD), median [IQR] and min/max each on its own
+line). Output can be
 stratified by a single categorical variable with {opt by()} and optionally
 include a total column with {cmd:addtotal}.
 
@@ -57,6 +60,9 @@ min/max. This is the default when no layout option is specified.
 
 {phang}{opt sumonly} displays the sum and its percentage relative to the total
 sum across all observations.
+
+{phang}{opt verticallayout} stacks every statistic on its own line: N, then
+mean (SD), then median [IQR], then (min/max). May be abbreviated {cmd:verti}.
 
 {phang}{opt format(string)} sets the numeric display format. Default is
 {cmd:%9.1f}.

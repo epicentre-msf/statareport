@@ -54,6 +54,30 @@ start_case "quant: sumonly by(foreign) addtotal"
     substr_in, haystack(`"`=value_1[1]'"') needle("30.8")   msg("Foreign share = 30.8%")
 end_case
 
+start_case "quant: verticallayout -- N, mean (SD), median [IQR], (min/max) stacked"
+    sysuse auto, clear
+    tempfile out
+    quant price, output("`out'") verticallayout
+    use "`out'", clear
+    eq, expr("_N == 1") msg("1 row")
+    substr_in, haystack(`"`=value[1]'"') needle("74")     msg("vertical has N=74")
+    substr_in, haystack(`"`=value[1]'"') needle("6165.3") msg("vertical has mean 6165.3")
+    substr_in, haystack(`"`=value[1]'"') needle("2949.5") msg("vertical has SD 2949.5")
+    substr_in, haystack(`"`=value[1]'"') needle("5006.5") msg("vertical has median 5006.5")
+    substr_in, haystack(`"`=value[1]'"') needle("4195.0") msg("vertical has p25 4195.0")
+    substr_in, haystack(`"`=value[1]'"') needle("6342.0") msg("vertical has p75 6342.0")
+    substr_in, haystack(`"`=value[1]'"') needle("15906")  msg("vertical has max 15906")
+    substr_in, haystack(`"`=value[1]'"') needle("\n")     msg("vertical uses \n line breaks")
+end_case
+
+start_case "quant: verti abbreviation works"
+    sysuse auto, clear
+    tempfile out
+    quant price, output("`out'") verti
+    use "`out'", clear
+    substr_in, haystack(`"`=value[1]'"') needle("6165.3") msg("verti abbrev has mean")
+end_case
+
 start_case "quant: idstart() bumps the id column"
     sysuse auto, clear
     tempfile out
