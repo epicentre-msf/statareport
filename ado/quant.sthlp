@@ -19,7 +19,7 @@
 {synopt:{cmd:meanonly}}display N, mean (SD){p_end}
 {synopt:{cmd:medianonly}}display median (IQR) and min/max{p_end}
 {synopt:{cmd:sumonly}}display sum and percentage of total sum{p_end}
-{synopt:{cmdab:verti:callayout}}stack N, mean (SD), median [IQR] and min/max on separate lines{p_end}
+{synopt:{cmdab:verti:callayout}}stack N, mean (SD), median [IQR] and min/max on separate lines, opening with a blank line{p_end}
 {synopt:{cmd:format(}{it:string}{cmd:)}}numeric format for summaries (default {cmd:%9.1f}){p_end}
 {synopt:{cmd:idstart(}{it:integer}{cmd:)}}starting identifier value (default 1){p_end}
 {synopt:{cmd:addtotal}}include an overall Total column when {opt by()} is specified{p_end}
@@ -61,8 +61,12 @@ min/max. This is the default when no layout option is specified.
 {phang}{opt sumonly} displays the sum and its percentage relative to the total
 sum across all observations.
 
-{phang}{opt verticallayout} stacks every statistic on its own line: N, then
-mean (SD), then median [IQR], then (min/max). May be abbreviated {cmd:verti}.
+{phang}{opt verticallayout} stacks every statistic on its own line, opening
+with a blank line: then N, mean (SD), median [IQR], and (min/max). May be
+abbreviated {cmd:verti}. The leading blank line is carried as a {cmd:VBLANKLINE}
+sentinel on the cell's first line and turned into a blank line by the
+{cmd:table-breaks.lua} pandoc filter at render time, so this layout targets the
+docx render pipeline ({help knit} / {help statareport_render}).
 
 {phang}{opt format(string)} sets the numeric display format. Default is
 {cmd:%9.1f}.

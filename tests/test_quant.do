@@ -67,8 +67,8 @@ start_case "quant: verticallayout -- N, mean (SD), median [IQR], (min/max) stack
     substr_in, haystack(`"`=value[1]'"') needle("4195.0") msg("vertical has p25 4195.0")
     substr_in, haystack(`"`=value[1]'"') needle("6342.0") msg("vertical has p75 6342.0")
     substr_in, haystack(`"`=value[1]'"') needle("15906")  msg("vertical has max 15906")
-    substr_in, haystack(`"`=value[1]'"') needle("\n")     msg("vertical uses \n line breaks")
-    eq, expr(`"substr(`"`=value[1]'"', 1, 2) == "\n""') msg("vertical opens with a leading blank line")
+    substr_in, haystack(`"`=value[1]'"') needle("\n")     msg("vertical uses \n line breaks between stats")
+    eq, expr(`"substr(`"`=value[1]'"', 1, 10) == "VBLANKLINE""') msg("cell leads with the VBLANKLINE sentinel (rendered as a leading blank line)")
 end_case
 
 start_case "quant: verti abbreviation works"

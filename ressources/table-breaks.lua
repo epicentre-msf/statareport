@@ -1,11 +1,24 @@
 -- Convert line returns inside table cells to hard line breaks (DOCX-friendly)
 -- Usage: pandoc -t docx --lua-filter=table-linebreaks.lua -o out.docx in.md
 
+-- Sentinel that `quant, verticallayout' puts on a cell's first line so a
+-- leading blank line survives the pipeline. A genuinely empty first line is
+-- stripped by pandoc, so we instead carry a visible token and delete it here;
+-- the SoftBreak that follows it is converted to a hard break (below), which
+-- becomes the wanted leading blank line. Keep in sync with ado/quant.ado.
+local LEADING_BLANK = "VBLANKLINE"
+
 local function replace_inlines(inlines)
   local out = {}
   for _, inline in ipairs(inlines) do
     if inline.t == "SoftBreak" then
       table.insert(out, pandoc.LineBreak())
+    elseif inline.t == "Str" and inline.text == LEADING_BLANK then
+      -- Replace the sentinel with a non-breaking space (U+00A0, UTF-8 C2 A0)
+      -- so the cell's first line is non-empty: the docx writer drops a
+      -- paragraph-leading LineBreak, so we keep a (blank-looking) first line
+      -- and let the SoftBreak after it become the leading blank line.
+      table.insert(out, pandoc.Str("\194\160"))
     elseif inline.t == "Str" and (inline.text == "\\n" or inline.text == "<br>") then
       -- Replace literal "\n" or "<br>" markers with a real line break
       table.insert(out, pandoc.LineBreak())

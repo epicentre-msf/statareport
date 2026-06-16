@@ -27,11 +27,17 @@ Display details
 Full results write result: N, median (IQR) (min/max)
 Mean only writes result: N, mean (SD)
 Median only writes result: Median (IQR) (min/max)
-Vertical layout stacks every statistic on its own line:
+Vertical layout stacks every statistic on its own line, opening with a blank
+line:
+    <blank>
     N
     mean (SD)
     median [Q1 ; Q3]
     (min/max)
+The leading blank line is carried as a "VBLANKLINE" sentinel on the cell's
+first line; the table-breaks.lua pandoc filter turns it into the blank line at
+render time (a genuinely empty first line is dropped by pandoc). This layout is
+therefore meant for the docx render pipeline.
 
 Separators
 ---------------------------------
@@ -225,7 +231,12 @@ program quant
 				}
 
 				if (("`verticallayout'" != "") & (!`emptydb')) {
-					local quantval = "\n `nobs' \n `mn' (`sd') \n `med' `medop'`p25' `medsep' `p75'`medcl' \n `mop'`min' `mxsep' `max'`mcl'"
+					// Lead with a sentinel on its own line. kable keeps it as the
+				// cell's first physical line (a genuinely empty first line is
+				// dropped by pandoc); the table-breaks Lua filter then deletes
+				// the sentinel, leaving the line break after it as the wanted
+				// leading blank line. Keep "VBLANKLINE" in sync with the filter.
+				local quantval = "VBLANKLINE \n `nobs' \n `mn' (`sd') \n `med' `medop'`p25' `medsep' `p75'`medcl' \n `mop'`min' `mxsep' `max'`mcl'"
 				}
 
 				local lbl: variable label `v'
@@ -328,7 +339,12 @@ program quant
 			}
 
 			if (("`verticallayout'" != "") & (!`emptydb')) {
-				local quantval = "\n `nobs' \n `mn' (`sd') \n `med' `medop'`p25' `medsep' `p75'`medcl' \n `mop'`min' `mxsep' `max'`mcl'"
+				// Lead with a sentinel on its own line. kable keeps it as the
+				// cell's first physical line (a genuinely empty first line is
+				// dropped by pandoc); the table-breaks Lua filter then deletes
+				// the sentinel, leaving the line break after it as the wanted
+				// leading blank line. Keep "VBLANKLINE" in sync with the filter.
+				local quantval = "VBLANKLINE \n `nobs' \n `mn' (`sd') \n `med' `medop'`p25' `medsep' `p75'`medcl' \n `mop'`min' `mxsep' `max'`mcl'"
 			}
 
 			local lbl: variable label `v'
