@@ -1,13 +1,14 @@
-*! export_dta_labels 1.0
+*! export_dta_labels 1.1
 *! Extract dataset/variable/value labels and notes from every .dta in a
 *! folder into a pipe-delimited flat file (one record per line, free text last).
 capture program drop export_dta_labels
 program export_dta_labels
     version 15
-    syntax [, Folder(string) OUTfile(string)]
+    syntax [, Folder(string) OUTfile(string) PATtern(string)]
 
     if "`folder'"  == "" local folder  "."
     if "`outfile'" == "" local outfile "`folder'/var_lbl_folder.txt"
+    if `"`pattern'"' == "" local pattern "*.dta"
 
     // header (created / overwritten here; data blocks are appended in Mata)
     tempname fh
@@ -23,9 +24,15 @@ program export_dta_labels
     file write `fh' "# Do not add, remove, reorder or merge lines." _n
     file close `fh'
 
-    local files : dir "`folder'" files "*.dta"
+    // accept one or more space-separated glob patterns ("*" and "?" wildcards,
+    // per Stata's dir extended function); union dedupes overlapping matches.
+    local files ""
+    foreach pat of local pattern {
+        local hits : dir "`folder'" files `"`pat'"'
+        local files : list files | hits
+    }
     if `: word count `files'' == 0 {
-        display as error "no .dta files found in `folder'"
+        display as error "no files matching `pattern' found in `folder'"
         exit 601
     }
 

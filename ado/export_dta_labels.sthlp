@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 1.0 02jun2026}
+{* *! version 1.1 16jun2026}
 {title:Title}
 {pstd}{bf:export_dta_labels} {hline 2} Export dataset, variable and value labels plus notes from every {cmd:.dta} in a folder into a pipe-delimited flat file.
 
@@ -12,6 +12,7 @@
 {synoptline}
 {synopt:{opt folder(string)}}directory holding the {cmd:.dta} files (default: current directory){p_end}
 {synopt:{opt out:file(string)}}flat file to write (default: {cmd:<folder>/var_lbl_folder.txt}){p_end}
+{synopt:{opt pat:tern(string)}}one or more space-separated glob patterns to match (default: {cmd:*.dta}){p_end}
 {synoptline}
 {p2colreset}{...}
 
@@ -44,10 +45,20 @@ Defaults to the current working directory.
 {cmd:var_lbl_folder.txt} inside {opt folder}. The file is overwritten if it
 exists.
 
+{phang}{opt pattern(string)} restricts the scan to files matching one or more
+space-separated glob patterns. Wildcards {cmd:*} and {cmd:?} are supported (as
+in Stata's {help extended_fcn:dir} extended function); character classes and
+{cmd:**} are not. Defaults to {cmd:*.dta}. To export only files whose name
+starts with a prefix, use e.g. {cmd:pattern("survey_*.dta")}; to match several
+families at once, list them: {cmd:pattern("survey_*.dta census_*.dta")}.
+Overlapping matches are de-duplicated.
+
 {title:Examples}
 {phang}{cmd:. export_dta_labels, folder("data/raw")}{p_end}
 
 {phang}{cmd:. export_dta_labels, folder("data/raw") outfile("labels.txt")}{p_end}
+
+{phang}{cmd:. export_dta_labels, folder("data/raw") pattern("survey_*.dta")}{p_end}
 
 {title:Workflow}
 {pstd}{cmd:export_dta_labels} produces the input for {help translate_dta_labels},
