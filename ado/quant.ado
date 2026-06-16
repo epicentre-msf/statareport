@@ -225,7 +225,7 @@ program quant
 				}
 
 				if (("`verticallayout'" != "") & (!`emptydb')) {
-					local quantval = "`nobs' \n `mn' (`sd') \n `med' `medop'`p25' `medsep' `p75'`medcl' \n `mop'`min' `mxsep' `max'`mcl'"
+					local quantval = "\n `nobs' \n `mn' (`sd') \n `med' `medop'`p25' `medsep' `p75'`medcl' \n `mop'`min' `mxsep' `max'`mcl'"
 				}
 
 				local lbl: variable label `v'
@@ -328,7 +328,7 @@ program quant
 			}
 
 			if (("`verticallayout'" != "") & (!`emptydb')) {
-				local quantval = "`nobs' \n `mn' (`sd') \n `med' `medop'`p25' `medsep' `p75'`medcl' \n `mop'`min' `mxsep' `max'`mcl'"
+				local quantval = "\n `nobs' \n `mn' (`sd') \n `med' `medop'`p25' `medsep' `p75'`medcl' \n `mop'`min' `mxsep' `max'`mcl'"
 			}
 
 			local lbl: variable label `v'
