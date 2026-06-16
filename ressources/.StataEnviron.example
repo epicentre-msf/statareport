@@ -19,3 +19,11 @@
 
 # --- Project root override (rarely needed; `here' finds it by default) ---
 # PROJECT=/Users/you/projects/
+
+# --- Anthropic API key for translate_dta_labels -------------------------
+# Used by `translate_dta_labels' for LLM label translation. Unlike the keys
+# above, this one is NOT loaded as a Stata global: the shell sources this
+# file and expands the variable when calling the API, so the secret never
+# enters Stata. Override the variable name with translate_dta_labels'
+# keyvar() option.
+# ANTH_API_KEY=sk-ant-...

@@ -1,17 +1,20 @@
-*! translate_dta_labels 1.1
+*! translate_dta_labels 1.2
 *! Translate the free-text fields of a Stata label-export file (var_lbl_folder.txt)
 *! from one language into another via the Anthropic Messages API, by shelling
 *! out to curl + jq. The source language is fromlang() (default French) and the
 *! target language is tolang() (default English).
 *!
 *! The API key is NEVER read into a Stata command string or written to disk:
-*! Stata only checks that the environment variable is visible, and the OS shell
-*! expands $<KEYVAR> at call time. Requires: curl, jq.
+*! the OS shell sources the project .StataEnviron (when present) and expands
+*! $<KEYVAR> at call time; the key may instead be exported in the OS
+*! environment. Key lookup order: envfile() if given, else .StataEnviron at the
+*! here-root (or current dir), with the OS environment as the fallback.
+*! Requires: curl, jq.
 capture program drop translate_dta_labels
 program translate_dta_labels
     version 15
     syntax [, INfile(string) OUTfile(string) MODel(string) FROMlang(string) ///
-              TOlang(string) KEYVar(string) CHUNKsize(integer 100) ///
+              TOlang(string) KEYVar(string) ENVfile(string) CHUNKsize(integer 100) ///
               MAXtokens(integer 8192) VERBose DRYrun]
 
     if `"`infile'"'   == "" local infile   "var_lbl_folder.txt"
@@ -21,22 +24,26 @@ program translate_dta_labels
     if "`tolang'"     == "" local tolang    "English"
     if "`keyvar'"     == "" local keyvar    "ANTH_API_KEY"
 
+    // Resolve the project .StataEnviron. With no envfile() the file is looked
+    // for at the cached here-root, else in the current directory. It is the OS
+    // shell -- not Stata -- that sources this file, so the key value never
+    // enters a Stata local or command string.
+    if (`"`envfile'"' == "") {
+        local root ""
+        capture mata: st_local("root", __here_root__)
+        if (`"`root'"' != "") local envfile `"`root'/.StataEnviron"'
+        else                  local envfile ".StataEnviron"
+    }
+    local have_envfile 0
+    capture confirm file `"`envfile'"'
+    if (!_rc) local have_envfile 1
+
     // preflight: input exists
     capture confirm file "`infile'"
     if _rc {
         display as error "input file not found: `infile'"
         exit 601
     }
-
-    // preflight: key visible to Stata (value used only to test non-emptiness)
-    local apikey : environment `keyvar'
-    if `"`apikey'"' == "" {
-        display as error "environment variable `keyvar' is empty or not visible to Stata."
-        display as error "macOS: GUI-launched Stata ignores ~/.zprofile/~/.zshrc. Put it in ~/.zshenv"
-        display as error "and launch Stata from a terminal, or use: launchctl setenv `keyvar' <key>"
-        exit 198
-    }
-    local apikey ""   // drop it immediately; the shell expands the var itself
 
     // preflight: curl and jq present
     tempfile chk
@@ -47,7 +54,33 @@ program translate_dta_labels
         exit 199
     }
 
-    tempfile sysf chunkf bodyf respf httpf outf errf runf
+    tempfile sysf chunkf bodyf respf httpf outf errf runf keyck keyout
+
+    // preflight: the key must be reachable by the shell -- either exported in
+    // the OS environment or defined in the project .StataEnviron, which the run
+    // script sources. This probe sources the same file and prints only
+    // OK/MISSING, so the key value is never read back into Stata.
+    tempname kh
+    file open `kh' using "`keyck'", write text replace
+    file write `kh' "#!/bin/sh" _n
+    file write `kh' `"[ -f "`envfile'" ] && . "`envfile'""' _n
+    file write `kh' `"[ -n "\$`keyvar'" ] && echo OK || echo MISSING"' _n
+    file close `kh'
+    quietly shell sh "`keyck'" > "`keyout'" 2>/dev/null
+    mata: st_local("keystate", _xlt_firstline("`keyout'"))
+    if ("`keystate'" != "OK") {
+        display as error "API key `keyvar' not found."
+        if (`have_envfile') {
+            display as error "  add a line  `keyvar'=<key>  to `envfile'"
+        }
+        else {
+            display as error "  no .StataEnviron found (looked for `envfile')"
+            display as error "  create one there with a line  `keyvar'=<key>"
+        }
+        display as error "  -- or export `keyvar' in the OS environment."
+        display as error "  macOS GUI Stata also reads ~/.zshenv, or: launchctl setenv `keyvar' <key>"
+        exit 198
+    }
 
     // system prompt (no labels, no secrets)
     file open sp using "`sysf'", write text replace
@@ -65,13 +98,17 @@ program translate_dta_labels
     // \$ keeps the dollar literal so the OS shell -- not Stata -- expands it.
     file open rs using "`runf'", write text replace
     file write rs "#!/bin/sh" _n
+    file write rs `"[ -f "`envfile'" ] && . "`envfile'""' _n
     file write rs `"jq -n --arg model "`model'" --argjson max `maxtokens' --rawfile sys "`sysf'" --rawfile content "`chunkf'" '{model:\$model,max_tokens:\$max,system:\$sys,messages:[{role:"user",content:\$content}]}' > "`bodyf'""' _n
     file write rs `"curl -sS -o "`respf'" -w '%{http_code}' https://api.anthropic.com/v1/messages -H "x-api-key: \$`keyvar'" -H "anthropic-version: 2023-06-01" -H "content-type: application/json" -d @"`bodyf'" > "`httpf'""' _n
     file write rs `"jq -r '[.content[]? | select(.type=="text") | .text] | join("")' "`respf'" > "`outf'" 2>/dev/null"' _n
     file write rs `"jq -r '.error.message // empty' "`respf'" > "`errf'" 2>/dev/null"' _n
     file close rs
 
-    // write the # header lines once (overwrites outfile)
+    // write the # header lines once (overwrites outfile). Remove any stale
+    // output first: Mata's fopen(...,"w") errors r(602) if the file exists, so
+    // a re-run with the same outfile would otherwise fail.
+    capture erase "`outfile'"
     mata: _xlt_writehdr("`infile'", "`outfile'")
 
     // number of translatable (non-#) lines
@@ -82,6 +119,8 @@ program translate_dta_labels
         display as text "  translate `fromlang' -> `tolang'"
         display as text "  run script: `runf'"
         display as text "  system prompt: `sysf'"
+        if (`have_envfile') display as text "  env file (sourced by shell): `envfile'"
+        else                display as text "  env file: none found (`envfile')"
         exit 0
     }
 

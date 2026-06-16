@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 1.1 02jun2026}
+{* *! version 1.2 16jun2026}
 {title:Title}
 {pstd}{bf:translate_dta_labels} {hline 2} Translate the free-text fields of a label-export file from one language into another via the Anthropic Messages API.
 
@@ -16,6 +16,7 @@
 {synopt:{opt from:lang(string)}}source language (default: {cmd:French}){p_end}
 {synopt:{opt to:lang(string)}}target language (default: {cmd:English}){p_end}
 {synopt:{opt keyv:ar(string)}}environment variable holding the API key (default: {cmd:ANTH_API_KEY}){p_end}
+{synopt:{opt env:file(string)}}dotenv file the shell sources for the key (default: {cmd:.StataEnviron} at the project root){p_end}
 {synopt:{opt chunk:size(integer)}}records sent per API request (default: 100){p_end}
 {synopt:{opt max:tokens(integer)}}max output tokens per request (default: 8192){p_end}
 {synopt:{opt verb:ose}}report each chunk as it succeeds{p_end}
@@ -38,11 +39,19 @@ be on the {cmd:PATH} (install {cmd:jq} with {cmd:brew install jq}). {cmd:jq}
 builds the JSON request body so every field is correctly escaped.
 
 {pstd}{bf:API key handling.} The key is never read into a Stata command string
-or written to disk. Stata only checks that the environment variable named by
-{opt keyvar} is visible and non-empty; the OS shell expands it at call time when
-the request is sent. On macOS a GUI-launched Stata ignores {cmd:~/.zprofile} and
-{cmd:~/.zshrc}: put the variable in {cmd:~/.zshenv} and launch Stata from a
-terminal, or run {cmd:launchctl setenv ANTH_API_KEY <key>}.
+or written to disk. The OS shell sources the project {cmd:.StataEnviron} (a
+{cmd:KEY=VALUE} dotenv file) and expands the variable named by {opt keyvar} at
+call time, so the value flows file {c -}>{c -} shell {c -}>{c -} request without
+passing through Stata. The recommended setup is therefore a project-level
+{cmd:.StataEnviron} containing a line like {cmd:ANTH_API_KEY=sk-...} (an optional
+{cmd:export} prefix and surrounding quotes are accepted).
+
+{pstd}The key may instead be exported in the operating-system environment. The
+preflight accepts the key if it is found in {opt envfile} {it:or} the OS
+environment, and errors with a hint otherwise. On macOS a GUI-launched Stata
+ignores {cmd:~/.zprofile} and {cmd:~/.zshrc}: either use {cmd:.StataEnviron} as
+above, put the variable in {cmd:~/.zshenv} and launch Stata from a terminal, or
+run {cmd:launchctl setenv ANTH_API_KEY <key>}.
 
 {pstd}{bf:Robustness.} Records are processed in chunks of {opt chunksize}. If a
 chunk returns a non-200 HTTP status, or returns a different number of lines than
@@ -71,6 +80,12 @@ in {opt tolang} is left unchanged.
 {phang}{opt keyvar(string)} name of the environment variable holding the
 Anthropic API key. Defaults to {cmd:ANTH_API_KEY}.
 
+{phang}{opt envfile(string)} path to a dotenv file that the shell sources to
+obtain the key. When omitted, {cmd:.StataEnviron} at the cached {help here}
+project root is used, or {cmd:.StataEnviron} in the current directory if no root
+is cached. The file is only read by the shell, never by Stata; if it does not
+exist, the command falls back to the OS environment.
+
 {phang}{opt chunksize(integer)} number of records sent per API request. Defaults
 to 100. Smaller chunks are more robust to per-request line-count mismatches;
 larger chunks make fewer calls.
@@ -92,6 +107,8 @@ then exit without calling the API.
 {phang}{cmd:. translate_dta_labels, fromlang("Spanish") tolang("English") verbose}{p_end}
 
 {phang}{cmd:. translate_dta_labels, infile("labels.txt") outfile("labels_en.txt") chunksize(50)}{p_end}
+
+{phang}{cmd:. translate_dta_labels, envfile("config/secrets.env") keyvar("MY_ANTHROPIC_KEY")}{p_end}
 
 {title:Workflow}
 {pstd}{cmd:translate_dta_labels} sits between {help export_dta_labels} and
