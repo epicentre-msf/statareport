@@ -1,4 +1,4 @@
-*! translate_dta_labels 1.2
+*! translate_dta_labels 1.3
 *! Translate the free-text fields of a Stata label-export file (var_lbl_folder.txt)
 *! from one language into another via the Anthropic Messages API, by shelling
 *! out to curl + jq. The source language is fromlang() (default French) and the
@@ -105,10 +105,7 @@ program translate_dta_labels
     file write rs `"jq -r '.error.message // empty' "`respf'" > "`errf'" 2>/dev/null"' _n
     file close rs
 
-    // write the # header lines once (overwrites outfile). Remove any stale
-    // output first: Mata's fopen(...,"w") errors r(602) if the file exists, so
-    // a re-run with the same outfile would otherwise fail.
-    capture erase "`outfile'"
+    // write the # header lines once (overwrites outfile)
     mata: _xlt_writehdr("`infile'", "`outfile'")
 
     // number of translatable (non-#) lines
@@ -192,6 +189,7 @@ void _xlt_writehdr(string scalar infile, string scalar outfile)
     real   scalar    fh, i
     L  = cat(infile)
     H  = (rows(L) ? select(L, substr(L, 1, 1) :== "#") : J(0, 1, ""))
+    if (fileexists(outfile)) unlink(outfile)   // fopen(...,"w") aborts r(602) if it exists
     fh = fopen(outfile, "w")
     for (i = 1; i <= rows(H); i++) fput(fh, H[i])
     fclose(fh)
@@ -204,6 +202,7 @@ void _xlt_chunk(string scalar infile, string scalar outchunk, real scalar lo, re
     real   scalar    fh, i
     L  = cat(infile)
     D  = select(L, substr(L, 1, 1) :!= "#")
+    if (fileexists(outchunk)) unlink(outchunk)  // fopen(...,"w") aborts r(602) if it exists
     fh = fopen(outchunk, "w")
     for (i = lo; i <= hi; i++) fput(fh, D[i])
     fclose(fh)

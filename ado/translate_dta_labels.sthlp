@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 1.2 16jun2026}
+{* *! version 1.3 16jun2026}
 {title:Title}
 {pstd}{bf:translate_dta_labels} {hline 2} Translate the free-text fields of a label-export file from one language into another via the Anthropic Messages API.
 
