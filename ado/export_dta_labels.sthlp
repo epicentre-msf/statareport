@@ -47,7 +47,7 @@ exists.
 
 {phang}{opt pattern(string)} restricts the scan to files matching one or more
 space-separated glob patterns. Wildcards {cmd:*} and {cmd:?} are supported (as
-in Stata's {help extended_fcn:dir} extended function); character classes and
+in Stata's {cmd:dir} extended macro function); character classes and
 {cmd:**} are not. Defaults to {cmd:*.dta}. To export only files whose name
 starts with a prefix, use e.g. {cmd:pattern("survey_*.dta")}; to match several
 families at once, list them: {cmd:pattern("survey_*.dta census_*.dta")}.
