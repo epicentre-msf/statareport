@@ -62,4 +62,26 @@ else {
         eq, expr(`"`n_sent' == 0"') msg("table-breaks filter consumed the VBLANKLINE sentinel")
         eq, expr(`"`n_brk' == 4"')  msg("four line breaks => one leading blank + three between stats")
     end_case
+
+    start_case "verticallayout noline: no leading blank line in the rendered docx"
+        sysuse auto, clear
+        quant price, output("`wd'/vtn.dta") verticallayout noline
+        use "`wd'/vtn.dta", clear
+        keep variable value
+        kable, space(90) cap("vertical noline render test") out("`wd'/tablen.md")
+
+        capture erase "`wd'/outn.docx"
+        knit using "`wd'/tablen.md", saving("`wd'/outn.docx") replace ///
+            filters(`""`repo'/ressources/page-orientation.lua" "`repo'/ressources/table-breaks.lua" "`repo'/ressources/list-tables.lua""')
+
+        capture erase "`wd'/backn.txt"
+        quietly shell pandoc "`wd'/outn.docx" -t native -o "`wd'/backn.txt" 2>/dev/null
+        quietly shell grep -c "LineBreak" "`wd'/backn.txt" > "`wd'/gn_brk" 2>/dev/null
+        tempname fc
+        file open `fc' using "`wd'/gn_brk", read text
+        file read `fc' n_brk_noline
+        file close `fc'
+
+        eq, expr(`"`n_brk_noline' == 3"') msg("three line breaks => no leading blank under noline")
+    end_case
 }

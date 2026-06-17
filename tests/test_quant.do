@@ -71,6 +71,17 @@ start_case "quant: verticallayout -- N, mean (SD), median [IQR], (min/max) stack
     eq, expr(`"substr(`"`=value[1]'"', 1, 10) == "VBLANKLINE""') msg("cell leads with the VBLANKLINE sentinel (rendered as a leading blank line)")
 end_case
 
+start_case "quant: verticallayout noline -- no leading-blank sentinel"
+    sysuse auto, clear
+    tempfile out
+    quant price, output("`out'") verticallayout noline
+    use "`out'", clear
+    eq, expr(`"strpos(`"`=value[1]'"', "VBLANKLINE") == 0"') msg("noline omits the VBLANKLINE sentinel")
+    eq, expr(`"substr(`"`=value[1]'"', 1, 2) == "74""')      msg("cell starts straight at N under noline")
+    substr_in, haystack(`"`=value[1]'"') needle("\n")        msg("noline still stacks stats with \n breaks")
+    substr_in, haystack(`"`=value[1]'"') needle("5006.5")    msg("noline still has median")
+end_case
+
 start_case "quant: verti abbreviation works"
     sysuse auto, clear
     tempfile out

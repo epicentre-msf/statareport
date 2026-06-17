@@ -37,7 +37,8 @@ line:
 The leading blank line is carried as a "VBLANKLINE" sentinel on the cell's
 first line; the table-breaks.lua pandoc filter turns it into the blank line at
 render time (a genuinely empty first line is dropped by pandoc). This layout is
-therefore meant for the docx render pipeline.
+therefore meant for the docx render pipeline. The leading blank line is on by
+default; add the noline option to drop it (no sentinel is emitted).
 
 Separators
 ---------------------------------
@@ -64,7 +65,7 @@ program quant
 
 	syntax varlist(min=1 numeric) [if] , OUTput(string) [append BY(varlist max=1) FULLresult MEANonly MEDianonly ///
 													FORMat(string) mxsep(string) medsep(string) MXBrack  ///
-													MEDPARenth ADDTOTal IDStart(integer 1) sumonly VERTIcallayout]
+													MEDPARenth ADDTOTal IDStart(integer 1) sumonly VERTIcallayout noline]
 
 
 	marksample touse, novarlist
@@ -129,6 +130,19 @@ program quant
 	}
 	local defaultmode = ("`fullresult'" == "") & ("`medianonly'" == "") & ("`meanonly'" == "") & ("`sumonly'" == "") & ("`verticallayout'" == "")
 	local requires_detail = ("`fullresult'" != "") | ("`medianonly'" != "") | ("`verticallayout'" != "") | `defaultmode'
+
+	// Vertical-layout leading blank line: a "VBLANKLINE" sentinel on the cell's
+	// first line that the table-breaks.lua pandoc filter turns into a blank line
+	// at render time. Added by default; suppressed with the noline option. Keep
+	// "VBLANKLINE" in sync with ressources/table-breaks.lua.
+	//
+	// syntax strips the leading "no": the `noline' option fills local `line'
+	// with "noline" when given and leaves it empty otherwise -- so an empty
+	// `line' means "keep the leading blank line".
+	local vblank ""
+	if (("`verticallayout'" != "") & ("`line'" == "")) {
+		local vblank "VBLANKLINE \n "
+	}
 
 	// Precompute total sums to use as denominator when sumonly is requested
 	if ("`sumonly'" != "") {
@@ -231,12 +245,8 @@ program quant
 				}
 
 				if (("`verticallayout'" != "") & (!`emptydb')) {
-					// Lead with a sentinel on its own line. kable keeps it as the
-				// cell's first physical line (a genuinely empty first line is
-				// dropped by pandoc); the table-breaks Lua filter then deletes
-				// the sentinel, leaving the line break after it as the wanted
-				// leading blank line. Keep "VBLANKLINE" in sync with the filter.
-				local quantval = "VBLANKLINE \n `nobs' \n `mn' (`sd') \n `med' `medop'`p25' `medsep' `p75'`medcl' \n `mop'`min' `mxsep' `max'`mcl'"
+				// `vblank' prepends the leading-blank sentinel (empty under noline).
+				local quantval = "`vblank'`nobs' \n `mn' (`sd') \n `med' `medop'`p25' `medsep' `p75'`medcl' \n `mop'`min' `mxsep' `max'`mcl'"
 				}
 
 				local lbl: variable label `v'
@@ -339,12 +349,8 @@ program quant
 			}
 
 			if (("`verticallayout'" != "") & (!`emptydb')) {
-				// Lead with a sentinel on its own line. kable keeps it as the
-				// cell's first physical line (a genuinely empty first line is
-				// dropped by pandoc); the table-breaks Lua filter then deletes
-				// the sentinel, leaving the line break after it as the wanted
-				// leading blank line. Keep "VBLANKLINE" in sync with the filter.
-				local quantval = "VBLANKLINE \n `nobs' \n `mn' (`sd') \n `med' `medop'`p25' `medsep' `p75'`medcl' \n `mop'`min' `mxsep' `max'`mcl'"
+				// `vblank' prepends the leading-blank sentinel (empty under noline).
+				local quantval = "`vblank'`nobs' \n `mn' (`sd') \n `med' `medop'`p25' `medsep' `p75'`medcl' \n `mop'`min' `mxsep' `max'`mcl'"
 			}
 
 			local lbl: variable label `v'
