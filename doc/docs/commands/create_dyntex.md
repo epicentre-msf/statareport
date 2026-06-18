@@ -37,10 +37,12 @@
 worksheet and writes a DynTex control file compatible with Stata's dynamic
 document system.  The label sheet must contain the following columns:
 **InputID**, **Include**, **Caption**, **Figure**, **FootNote**,
-**Section**, **Subsection**, and **DisplayMode**.  Rows whose **Include**
+**Section**, **Subsection**, and **DisplayMode**.  An optional
+**Subsubsection** column adds level-3 (`###`) headings; sheets without it
+keep working unchanged.  Rows whose **Include**
 column is not set to `"Yes"` are skipped.  Page orientation switches
-between Portrait and Landscape based on **DisplayMode**, and section and
-subsection headings are emitted when they change.
+between Portrait and Landscape based on **DisplayMode**, and section,
+subsection and subsubsection headings are emitted when they change.
 
 
 ## Options

@@ -9,6 +9,9 @@ Required columns in the label sheet:
 - FootNote     : optional footnote text.
 - Section      : optional level 1 heading.
 - Subsection   : optional level 2 heading.
+- Subsubsection: optional level 3 heading. This column is itself optional --
+                 label sheets created before it existed still work; when it is
+                 absent no level-3 headings are emitted.
 - DisplayMode  : "Portrait" or "Landscape" to switch page orientation.
 
 The command writes a DynTex file that Stata's dynamic document machinery can
@@ -51,6 +54,12 @@ program create_dyntex
         }
     }
 
+    // Subsubsection (level-3 heading, ###) is optional for backward
+    // compatibility with label sheets created before it existed. When the
+    // column is absent, no level-3 headings are emitted.
+    capture confirm variable Subsubsection
+    local has_subsubsection = (_rc == 0)
+
     // Coerce every label-sheet column to string. tostring refuses already-string
     // variables, so loop and skip those.
     foreach col of varlist _all {
@@ -64,6 +73,7 @@ program create_dyntex
     quietly replace Include   = lower(trim(Include))
     quietly replace Section   = trim(Section)
     quietly replace Subsection = trim(Subsection)
+    if (`has_subsubsection') quietly replace Subsubsection = trim(Subsubsection)
     quietly replace Caption   = trim(Caption)
     quietly replace FootNote  = trim(FootNote)
     quietly replace DisplayMode = trim(DisplayMode)
@@ -87,6 +97,7 @@ program create_dyntex
     // Emit content ------------------------------------------------------------
     local current_section ""
     local current_subsection ""
+    local current_subsubsection ""
     local current_mode "Portrait"
 
     use "`labels'", clear
@@ -106,6 +117,8 @@ program create_dyntex
         local footnote_clean = subinstr(`"`footnote'"', char(34), "\" + char(34), .)
         local section    = Section[`row']
         local subsection = Subsection[`row']
+        local subsubsection = ""
+        if (`has_subsubsection') local subsubsection = Subsubsection[`row']
         local display    = DisplayMode[`row']
         local isfigure   = Figure[`row']
 
@@ -134,6 +147,12 @@ program create_dyntex
             local current_subsection "`subsection'"
             file write _dyntex "## `current_subsection'" _n _n
             if (`verbose') display as result "  Subsection: `current_subsection'"
+        }
+
+        if ("`subsubsection'" != "" & "`subsubsection'" != "`current_subsubsection'") {
+            local current_subsubsection "`subsubsection'"
+            file write _dyntex "### `current_subsubsection'" _n _n
+            if (`verbose') display as result "    Subsubsection: `current_subsubsection'"
         }
 
         // Content --------------------------------------------------------------
