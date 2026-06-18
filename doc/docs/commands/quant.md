@@ -23,7 +23,10 @@ where *varlist* must contain only numeric variables.
 - `meanonly` — display N, mean (SD)
 - `medianonly` — display median (IQR) and min/max
 - `sumonly` — display sum and percentage of total sum
-- `format(`*string*`)` — numeric format for summaries (default `%9.1f`)
+- `format(`*string*`)` — global numeric format for summaries (default `%9.1f`)
+- **`meanform`**`at(`*string*`)` — numeric format for the mean and SD (overrides `format`)
+- **`medform`**`at(`*string*`)` — numeric format for the median and IQR (overrides `format`)
+- **`mxform`**`at(`*string*`)` — numeric format for the min and max (overrides `format`)
 - `idstart(`*integer*`)` — starting identifier value (default 1)
 - `addtotal` — include an overall Total column when `by()` is specified
 - `mxsep(`*string*`)` — separator between min and max values (default `/`)
@@ -67,8 +70,20 @@ min/max. This is the default when no layout option is specified.
 > `sumonly` displays the sum and its percentage relative to the total
 sum across all observations.
 
-> `format(string)` sets the numeric display format. Default is
-`%9.1f`.
+> `format(string)` sets the global numeric display format applied to every
+statistic. Default is `%9.1f`.
+
+> `meanformat(string)` sets the numeric display format for the mean and SD.
+When supplied it takes precedence over `format`; otherwise the value of
+`format` is used. May be abbreviated `meanform`.
+
+> `medformat(string)` sets the numeric display format for the median and the
+interquartile range (Q1/Q3). When supplied it takes precedence over `format`;
+otherwise the value of `format` is used. May be abbreviated `medform`.
+
+> `mxformat(string)` sets the numeric display format for the minimum and
+maximum. When supplied it takes precedence over `format`; otherwise the value
+of `format` is used. May be abbreviated `mxform`.
 
 > `idstart(integer)` sets the starting identifier value for the
 generated `id` column. Default is 1.
@@ -96,6 +111,8 @@ instead of square brackets.
 > `. quant hemoglobin if visit==1, output("output_tables/hb_baseline.dta") meanonly format(%9.2f)`
 
 > `. quant cost, output("output_tables/cost.dta") sumonly by(region) mxsep("-") medparenth append`
+
+> `. quant age, output("output_tables/age.dta") medformat(%9.0f) meanformat(%9.1f) mxformat(%9.0f)`
 
 
 ## Also see

@@ -11,7 +11,9 @@ Parameters:
 ============
 
 output: the output file for the tabulation
-format: the format in the computation
+format: the global numeric format for the computation
+meanformat, medformat, mxformat: per-statistic formats overriding the global
+format for the mean/SD, the median/IQR, and the min/max respectively (see details)
 append: if the output file exists, do you want to append the current tabulation to previous data?
 by: compute qualitative values by a categorical varlist.
 
@@ -49,6 +51,17 @@ medsep: Separator for the IQR, could be any given string, default is ";"
 mxbrack: use bracket to wrap (min/max). Default is parenthesis
 mxparenth: use parenthesis to wrap IQR. Default is brackets.
 
+Formats
+---------------------------------
+
+format: global numeric format applied to every statistic, default "%9.1f".
+
+meanformat, medformat, mxformat: per-statistic numeric formats. A specific
+format takes precedence over the global format; when a specific format is not
+set, the global format is used. meanformat applies to the mean and SD,
+medformat to the median and the IQR (Q1/Q3), and mxformat to the min and max.
+The sum/percentage (sumonly) always use the global format.
+
 Example
 ==========================================
 
@@ -64,7 +77,8 @@ program quant
 	*Median only writes result like median (IQR) (min/max)
 
 	syntax varlist(min=1 numeric) [if] , OUTput(string) [append BY(varlist max=1) FULLresult MEANonly MEDianonly ///
-													FORMat(string) mxsep(string) medsep(string) MXBrack  ///
+													FORMat(string) MEANFORMat(string) MEDFORMat(string) MXFORMat(string) ///
+													mxsep(string) medsep(string) MXBrack  ///
 													MEDPARenth ADDTOTal IDStart(integer 1) sumonly VERTIcallayout noline]
 
 
@@ -127,6 +141,21 @@ program quant
 	// Default format setup
 	if ("`format'" == ""){
 	   local format  "%9.1f"
+	}
+
+	// Per-statistic formats. Each takes precedence over the global `format';
+	// when a specific format is not supplied it falls back to the global
+	// `format' (which itself defaults to %9.1f above). meanformat covers the
+	// mean and SD; medformat covers the median and the IQR (Q1/Q3); mxformat
+	// covers the minimum and maximum. The sum/percentage always use `format'.
+	if ("`meanformat'" == ""){
+		local meanformat "`format'"
+	}
+	if ("`medformat'" == ""){
+		local medformat "`format'"
+	}
+	if ("`mxformat'" == ""){
+		local mxformat "`format'"
 	}
 	local defaultmode = ("`fullresult'" == "") & ("`medianonly'" == "") & ("`meanonly'" == "") & ("`sumonly'" == "") & ("`verticallayout'" == "")
 	local requires_detail = ("`fullresult'" != "") | ("`medianonly'" != "") | ("`verticallayout'" != "") | `defaultmode'
@@ -199,15 +228,15 @@ program quant
 				local allperc ""
 
 				if (!`emptydb'){
-					local mn = string(`r(mean)', "`format'")
-					local sd = string(`r(sd)', "`format'")
+					local mn = string(`r(mean)', "`meanformat'")
+					local sd = string(`r(sd)', "`meanformat'")
 
 					if (`requires_detail') {
-						local med = string(`r(p50)', "`format'")
-						local p25 = string(`r(p25)', "`format'")
-						local p75 =  string(`r(p75)', "`format'")
-						local min = string(`r(min)', "`format'")
-						local max = string(`r(max)', "`format'")
+						local med = string(`r(p50)', "`medformat'")
+						local p25 = string(`r(p25)', "`medformat'")
+						local p75 =  string(`r(p75)', "`medformat'")
+						local min = string(`r(min)', "`mxformat'")
+						local max = string(`r(max)', "`mxformat'")
 					}
 
 					local grp_sum = `r(sum)'
@@ -303,14 +332,14 @@ program quant
 			local allperc ""
 
 			if (!`emptydb'){
-				local mn = string(`r(mean)', "`format'")
-				local sd = string(`r(sd)', "`format'")
+				local mn = string(`r(mean)', "`meanformat'")
+				local sd = string(`r(sd)', "`meanformat'")
 				if (`requires_detail') {
-					local med = string(`r(p50)', "`format'")
-					local p25 = string(`r(p25)', "`format'")
-					local p75 =  string(`r(p75)', "`format'")
-					local min = string(`r(min)', "`format'")
-					local max = string(`r(max)', "`format'")
+					local med = string(`r(p50)', "`medformat'")
+					local p25 = string(`r(p25)', "`medformat'")
+					local p75 =  string(`r(p75)', "`medformat'")
+					local min = string(`r(min)', "`mxformat'")
+					local max = string(`r(max)', "`mxformat'")
 				}
 
 				local grp_sum = `r(sum)'

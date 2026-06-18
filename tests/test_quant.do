@@ -90,6 +90,37 @@ start_case "quant: verti abbreviation works"
     substr_in, haystack(`"`=value[1]'"') needle("6165.3") msg("verti abbrev has mean")
 end_case
 
+start_case "quant: per-statistic formats override the global format"
+    sysuse auto, clear
+    tempfile out
+    quant price, output("`out'") verticallayout meanformat(%9.3f) medformat(%9.2f) mxformat(%9.0f)
+    use "`out'", clear
+    substr_in, haystack(`"`=value[1]'"') needle("6165.257")        msg("meanformat -> mean at %9.3f")
+    substr_in, haystack(`"`=value[1]'"') needle("2949.496")        msg("meanformat -> SD at %9.3f")
+    substr_in, haystack(`"`=value[1]'"') needle("5006.50")         msg("medformat -> median at %9.2f")
+    substr_in, haystack(`"`=value[1]'"') needle("4195.00")         msg("medformat -> p25 at %9.2f")
+    substr_in, haystack(`"`=value[1]'"') needle("6342.00")         msg("medformat -> p75 at %9.2f")
+    substr_in, haystack(`"`=value[1]'"') needle("(3291 / 15906)")  msg("mxformat -> min/max at %9.0f")
+end_case
+
+start_case "quant: a specific format takes precedence; unset ones fall back to global"
+    sysuse auto, clear
+    tempfile out
+    quant price, output("`out'") format(%9.0f) medformat(%9.2f)
+    use "`out'", clear
+    substr_in, haystack(`"`=value[1]'"') needle("5006.50")         msg("medformat overrides the global %9.0f")
+    substr_in, haystack(`"`=value[1]'"') needle("(3291 / 15906)")  msg("min/max fall back to the global %9.0f")
+end_case
+
+start_case "quant: meanformat overrides the default global format"
+    sysuse auto, clear
+    tempfile out
+    quant price, output("`out'") meanonly meanformat(%9.3f)
+    use "`out'", clear
+    substr_in, haystack(`"`=value[1]'"') needle("6165.257") msg("meanonly mean at meanformat %9.3f")
+    substr_in, haystack(`"`=value[1]'"') needle("2949.496") msg("meanonly SD at meanformat %9.3f")
+end_case
+
 start_case "quant: idstart() bumps the id column"
     sysuse auto, clear
     tempfile out
