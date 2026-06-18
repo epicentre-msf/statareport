@@ -144,18 +144,24 @@ program create_dyntex
             file write _dyntex ":::" _n _n
         }
         else {
-            local footopt ""
-            if ("`footnote_clean'" != "") local footopt `" footnote("`footnote_clean'")"'
-
+            // The footnote is emitted below as its own custom-style="footnote"
+            // block so it picks up the footnote paragraph style from the
+            // reference docx. It is intentionally NOT forwarded to kable's
+            // footnote() option, which would append a plain, unstyled paragraph
+            // to the table markdown instead.
             if (`verbose') display as result "  Table `id'"
             file write _dyntex "<<dd_do: nocommands>>" _n
             file write _dyntex `"quietly use "`tab_dir'/`id'.dta", clear"' _n
-            file write _dyntex `" capture kable, space(90) cap("`caption_clean'")`footopt' out("temp.md")"' _n
+            file write _dyntex `" capture kable, space(90) cap("`caption_clean'") out("temp.md")"' _n
             file write _dyntex "<</dd_do>>" _n _n
             file write _dyntex `"<<dd_include: "temp.md">>"' _n _n
         }
 
-        if ("`footnote_clean'" != "" & substr("`isfigure'", 1, 1) == "y") {
+        // Footnote (figures and tables): wrap in a custom-style="footnote"
+        // fenced div so pandoc applies the reference docx's "footnote" paragraph
+        // style in the output -- the same mechanism used for the figure block
+        // above. A bare paragraph would render with the default body style.
+        if ("`footnote_clean'" != "") {
             file write _dyntex `"::: {custom-style="footnote"}"' _n
             file write _dyntex "`footnote_clean'" _n
             file write _dyntex ":::" _n _n
