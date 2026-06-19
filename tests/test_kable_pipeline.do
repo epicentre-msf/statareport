@@ -99,3 +99,35 @@ start_case "end-to-end: verified numeric cells round-trip through kable"
     eq, expr("`has_5759' == 1") msg("rendered table includes Foreign  median 5759")
     eq, expr("`has_74'   == 1") msg("rendered table includes Total N=74 prefix")
 end_case
+
+start_case "kable: non-breaking spaces in labels are preserved (not stripped)"
+    * NBSP (U+00A0) is commonly used to indent labels. kable must keep it:
+    * the cell trim is ASCII-only (strtrim), not ustrtrim which would drop it.
+    local nbsp = uchar(160)
+    clear
+    set obs 2
+    gen str40 label = ""
+    replace label = "`nbsp'`nbsp'Indented" in 1
+    replace label = "Word`nbsp'Word"       in 2
+    gen str6 value = "x"
+
+    tempfile md mdp
+    kable, caption("NBSP")      output("`md'")
+    kable, caption("NBSP") pipe output("`mdp'")
+
+    foreach f in `"`md'"' `"`mdp'"' {
+        local saw_leading  = 0
+        local saw_internal = 0
+        tempname fh
+        file open `fh' using `"`f'"', read text
+        file read `fh' line
+        while (r(eof) == 0) {
+            if (strpos(`"`macval(line)'"', "`nbsp'`nbsp'Indented") > 0) local saw_leading  = 1
+            if (strpos(`"`macval(line)'"', "Word`nbsp'Word")       > 0) local saw_internal = 1
+            file read `fh' line
+        }
+        file close `fh'
+        eq, expr("`saw_leading'  == 1") msg("leading NBSP indentation preserved")
+        eq, expr("`saw_internal' == 1") msg("internal NBSP preserved")
+    }
+end_case

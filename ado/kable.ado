@@ -178,7 +178,11 @@ real scalar function k2_maxwidth(string scalar s)
     parts = k2_split_lines(s);
     maxw = 0;
     for (i = 1; i <= cols(parts); i++) {
-        w = ustrlen(ustrtrim(parts[i]));
+        // strtrim (ASCII spaces only), not ustrtrim: ustrtrim would also strip
+        // leading/trailing non-breaking spaces (U+00A0 etc.), dropping the
+        // indentation users add to labels. Must match the trim in k2_pad so the
+        // computed width and the padded content stay in sync.
+        w = ustrlen(strtrim(parts[i]));
         if (w > maxw) maxw = w;
     }
     return(maxw);
@@ -204,7 +208,9 @@ string scalar function k2_pad(string scalar s, real scalar width)
     string scalar trimmed;
     real scalar len, target;
 
-    trimmed = ustrtrim(s);
+    // strtrim trims ASCII spaces only; ustrtrim here would also strip
+    // leading/trailing non-breaking spaces (U+00A0 etc.) used to indent labels.
+    trimmed = strtrim(s);
     len = ustrlen(trimmed);
     target = ceil(width);
     if (len >= target) {
@@ -373,7 +379,9 @@ void function kable_render()
     for (r = 1; r <= rows(data); r++) {
         for (c = 1; c <= ncol; c++) {
             rowstr = data[r,c];
-            t = ustrtrim(rowstr);
+            // strtrim (ASCII only) so an intentionally NBSP-only cell is kept as
+            // content rather than collapsed to the missing-value placeholder.
+            t = strtrim(rowstr);
             if (ustrlen(t) == 0) {
                 data[r,c] = nachar;
             }
