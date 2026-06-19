@@ -81,11 +81,13 @@ abbreviated `meanform`.
 > `medformat(string)` sets the numeric display format for the median and the
 interquartile range (Q1/Q3). Precedence: this option, else `format`, else
 **the variable's own display format** (e.g. a `%9.0f` variable prints its
-median with no decimals). Resolved per variable. May be abbreviated `medform`.
+median with no decimals), falling back to `%9.1f` only if that format is somehow
+unavailable. Resolved per variable. May be abbreviated `medform`.
 
 > `mxformat(string)` sets the numeric display format for the minimum and
 maximum. Precedence: this option, else `format`, else **the variable's own
-display format**. Resolved per variable. May be abbreviated `mxform`.
+display format** (falling back to `%9.1f` if unavailable). Resolved per
+variable. May be abbreviated `mxform`.
 
 > `idstart(integer)` sets the starting identifier value for the
 generated `id` column. Default is 1.

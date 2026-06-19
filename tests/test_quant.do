@@ -153,6 +153,21 @@ start_case "quant: default median/min-max take the variable's own format; mean s
     eq, expr(`"strpos(`"`=value[1]'"', "3.000") == 0"')          msg("mean is NOT in the variable's %9.3f format")
 end_case
 
+start_case "quant: a variable's default %9.0g format is reachable (no blank cells)"
+    * Guards the variable-format default path: a plain gen'd variable carries the
+    * default %9.0g display format, which must be picked up and produce non-empty
+    * median/min-max cells (string() with an empty format would blank them).
+    clear
+    set obs 5
+    gen g = _n * 1.5    // 1.5 .. 7.5 ; default %9.0g ; median 4.5, min 1.5, max 7.5
+    tempfile out
+    quant g, output("`out'")
+    use "`out'", clear
+    eq, expr(`"strlen(trim(`"`=value[1]'"')) > 8"') msg("median/min-max cell is non-empty under the default %9.0g format")
+    substr_in, haystack(`"`=value[1]'"') needle("4.5")       msg("median 4.5 rendered via the variable's %9.0g format")
+    substr_in, haystack(`"`=value[1]'"') needle("(1.5 / 7.5)") msg("min/max rendered via the variable's %9.0g format")
+end_case
+
 start_case "quant: idstart() bumps the id column"
     sysuse auto, clear
     tempfile out

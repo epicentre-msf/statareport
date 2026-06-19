@@ -89,12 +89,13 @@ and SD. Precedence: this option, else {cmd:format}, else the default
 {phang}{opt medformat(string)} sets the numeric display format for the median
 and the interquartile range (Q1/Q3). Precedence: this option, else {cmd:format},
 else {bf:the variable's own display format} (e.g. a {cmd:%9.0f} variable prints
-its median with no decimals). Resolved per variable. May be abbreviated
-{cmd:medform}.
+its median with no decimals), falling back to {cmd:%9.1f} only if that format is
+somehow unavailable. Resolved per variable. May be abbreviated {cmd:medform}.
 
 {phang}{opt mxformat(string)} sets the numeric display format for the minimum
 and maximum. Precedence: this option, else {cmd:format}, else {bf:the variable's
-own display format}. Resolved per variable. May be abbreviated {cmd:mxform}.
+own display format} (falling back to {cmd:%9.1f} if unavailable). Resolved per
+variable. May be abbreviated {cmd:mxform}.
 
 {phang}{opt idstart(integer)} sets the starting identifier value for the
 generated {cmd:id} column. Default is 1.

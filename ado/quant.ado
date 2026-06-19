@@ -71,8 +71,11 @@ else a per-statistic default:
   - mxformat   (min and max)        -> default = the variable's own display
                                        format
 Because the median/min-max defaults follow the variable, they are resolved per
-variable. The sum/percentage (sumonly) use the global format() if supplied,
-else "%9.1f".
+variable. As a final safety net the median/min-max formats fall back to "%9.1f"
+if the variable's display format is somehow empty (a numeric variable always
+has one, so this is belt-and-suspenders against passing an empty format to
+string(), which would silently blank the cell). The sum/percentage (sumonly)
+use the global format() if supplied, else "%9.1f".
 
 Example
 ==========================================
@@ -237,13 +240,18 @@ program quant
 				}
 
 				// Per-variable median / min-max formats: specific option >
-				// global format() > the variable's own display format.
+				// global format() > the variable's own display format > %9.1f.
+				// The %9.1f tail is a safety net: a numeric variable always has
+				// a display format, but if `: format' ever returned empty it
+				// would pass "" to string() and silently blank the cell.
 				local medformat "`medformat0'"
 				if ("`medformat'" == "") local medformat "`format'"
 				if ("`medformat'" == "") local medformat : format `v'
+				if ("`medformat'" == "") local medformat "%9.1f"
 				local mxformat "`mxformat0'"
 				if ("`mxformat'" == "") local mxformat "`format'"
 				if ("`mxformat'" == "") local mxformat : format `v'
+				if ("`mxformat'" == "") local mxformat "%9.1f"
 
 				local nobs = `r(N)'
 				local emptydb = (`nobs' == 0)
@@ -351,13 +359,16 @@ program quant
 			}
 
 			// Per-variable median / min-max formats: specific option > global
-			// format() > the variable's own display format.
+			// format() > the variable's own display format > %9.1f (safety net,
+			// see the by() loop above).
 			local medformat "`medformat0'"
 			if ("`medformat'" == "") local medformat "`format'"
 			if ("`medformat'" == "") local medformat : format `v'
+			if ("`medformat'" == "") local medformat "%9.1f"
 			local mxformat "`mxformat0'"
 			if ("`mxformat'" == "") local mxformat "`format'"
 			if ("`mxformat'" == "") local mxformat : format `v'
+			if ("`mxformat'" == "") local mxformat "%9.1f"
 
 			local nobs = `r(N)'
 			local emptydb = (`nobs' == 0)
