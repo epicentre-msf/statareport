@@ -23,10 +23,10 @@ where *varlist* must contain only numeric variables.
 - `meanonly` — display N, mean (SD)
 - `medianonly` — display median (IQR) and min/max
 - `sumonly` — display sum and percentage of total sum
-- `format(`*string*`)` — global numeric format for summaries (default `%9.1f`)
-- **`meanform`**`at(`*string*`)` — numeric format for the mean and SD (overrides `format`)
-- **`medform`**`at(`*string*`)` — numeric format for the median and IQR (overrides `format`)
-- **`mxform`**`at(`*string*`)` — numeric format for the min and max (overrides `format`)
+- `format(`*string*`)` — optional global numeric format, used for any statistic without its own option
+- **`meanform`**`at(`*string*`)` — numeric format for the mean and SD (default `%9.1f`)
+- **`medform`**`at(`*string*`)` — numeric format for the median and IQR (default: the variable's own format)
+- **`mxform`**`at(`*string*`)` — numeric format for the min and max (default: the variable's own format)
 - `idstart(`*integer*`)` — starting identifier value (default 1)
 - `addtotal` — include an overall Total column when `by()` is specified
 - `mxsep(`*string*`)` — separator between min and max values (default `/`)
@@ -70,20 +70,22 @@ min/max. This is the default when no layout option is specified.
 > `sumonly` displays the sum and its percentage relative to the total
 sum across all observations.
 
-> `format(string)` sets the global numeric display format applied to every
-statistic. Default is `%9.1f`.
+> `format(string)` sets an optional global numeric display format, used for
+every statistic that does not have its own per-statistic option below. It has
+no default of its own: when omitted, the per-statistic defaults apply.
 
 > `meanformat(string)` sets the numeric display format for the mean and SD.
-When supplied it takes precedence over `format`; otherwise the value of
-`format` is used. May be abbreviated `meanform`.
+Precedence: this option, else `format`, else the default `%9.1f`. May be
+abbreviated `meanform`.
 
 > `medformat(string)` sets the numeric display format for the median and the
-interquartile range (Q1/Q3). When supplied it takes precedence over `format`;
-otherwise the value of `format` is used. May be abbreviated `medform`.
+interquartile range (Q1/Q3). Precedence: this option, else `format`, else
+**the variable's own display format** (e.g. a `%9.0f` variable prints its
+median with no decimals). Resolved per variable. May be abbreviated `medform`.
 
 > `mxformat(string)` sets the numeric display format for the minimum and
-maximum. When supplied it takes precedence over `format`; otherwise the value
-of `format` is used. May be abbreviated `mxform`.
+maximum. Precedence: this option, else `format`, else **the variable's own
+display format**. Resolved per variable. May be abbreviated `mxform`.
 
 > `idstart(integer)` sets the starting identifier value for the
 generated `id` column. Default is 1.

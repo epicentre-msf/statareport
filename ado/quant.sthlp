@@ -21,10 +21,10 @@
 {synopt:{cmd:sumonly}}display sum and percentage of total sum{p_end}
 {synopt:{cmdab:verti:callayout}}stack N, mean (SD), median [IQR] and min/max on separate lines, opening with a blank line{p_end}
 {synopt:{cmd:noline}}with {cmd:verticallayout}, drop the leading blank line{p_end}
-{synopt:{cmd:format(}{it:string}{cmd:)}}global numeric format for summaries (default {cmd:%9.1f}){p_end}
-{synopt:{cmdab:meanform:at(}{it:string}{cmd:)}}numeric format for the mean and SD (overrides {cmd:format}){p_end}
-{synopt:{cmdab:medform:at(}{it:string}{cmd:)}}numeric format for the median and IQR (overrides {cmd:format}){p_end}
-{synopt:{cmdab:mxform:at(}{it:string}{cmd:)}}numeric format for the min and max (overrides {cmd:format}){p_end}
+{synopt:{cmd:format(}{it:string}{cmd:)}}optional global numeric format, used for any statistic without its own option{p_end}
+{synopt:{cmdab:meanform:at(}{it:string}{cmd:)}}numeric format for the mean and SD (default {cmd:%9.1f}){p_end}
+{synopt:{cmdab:medform:at(}{it:string}{cmd:)}}numeric format for the median and IQR (default: the variable's own format){p_end}
+{synopt:{cmdab:mxform:at(}{it:string}{cmd:)}}numeric format for the min and max (default: the variable's own format){p_end}
 {synopt:{cmd:idstart(}{it:integer}{cmd:)}}starting identifier value (default 1){p_end}
 {synopt:{cmd:addtotal}}include an overall Total column when {opt by()} is specified{p_end}
 {synopt:{cmd:mxsep(}{it:string}{cmd:)}}separator between min and max values (default {cmd:/}){p_end}
@@ -77,21 +77,24 @@ blank line is added by default; pair with {cmd:noline} to omit it.
 (no {cmd:VBLANKLINE} sentinel is emitted). Has no effect without
 {cmd:verticallayout}.
 
-{phang}{opt format(string)} sets the global numeric display format applied to
-every statistic. Default is {cmd:%9.1f}.
+{phang}{opt format(string)} sets an optional global numeric display format. When
+supplied it is used for every statistic that does not have its own per-statistic
+option below. It has no default of its own: when omitted, the per-statistic
+defaults apply.
 
 {phang}{opt meanformat(string)} sets the numeric display format for the mean
-and SD. When supplied it takes precedence over {cmd:format}; otherwise the
-value of {cmd:format} is used. May be abbreviated {cmd:meanform}.
+and SD. Precedence: this option, else {cmd:format}, else the default
+{cmd:%9.1f}. May be abbreviated {cmd:meanform}.
 
 {phang}{opt medformat(string)} sets the numeric display format for the median
-and the interquartile range (Q1/Q3). When supplied it takes precedence over
-{cmd:format}; otherwise the value of {cmd:format} is used. May be abbreviated
+and the interquartile range (Q1/Q3). Precedence: this option, else {cmd:format},
+else {bf:the variable's own display format} (e.g. a {cmd:%9.0f} variable prints
+its median with no decimals). Resolved per variable. May be abbreviated
 {cmd:medform}.
 
 {phang}{opt mxformat(string)} sets the numeric display format for the minimum
-and maximum. When supplied it takes precedence over {cmd:format}; otherwise the
-value of {cmd:format} is used. May be abbreviated {cmd:mxform}.
+and maximum. Precedence: this option, else {cmd:format}, else {bf:the variable's
+own display format}. Resolved per variable. May be abbreviated {cmd:mxform}.
 
 {phang}{opt idstart(integer)} sets the starting identifier value for the
 generated {cmd:id} column. Default is 1.

@@ -11,9 +11,11 @@ Parameters:
 ============
 
 output: the output file for the tabulation
-format: the global numeric format for the computation
-meanformat, medformat, mxformat: per-statistic formats overriding the global
-format for the mean/SD, the median/IQR, and the min/max respectively (see details)
+format: optional global numeric format; used for any statistic without its own
+per-statistic option (see details)
+meanformat, medformat, mxformat: per-statistic formats for the mean/SD, the
+median/IQR, and the min/max. Defaults: meanformat %9.1f; medformat/mxformat the
+variable's own display format (see details)
 append: if the output file exists, do you want to append the current tabulation to previous data?
 by: compute qualitative values by a categorical varlist.
 
@@ -54,13 +56,23 @@ mxparenth: use parenthesis to wrap IQR. Default is brackets.
 Formats
 ---------------------------------
 
-format: global numeric format applied to every statistic, default "%9.1f".
+format: optional global numeric format. When supplied it is used for every
+statistic that does not have its own per-statistic option (below). It has no
+default of its own anymore -- if it is omitted, the per-statistic defaults
+apply.
 
-meanformat, medformat, mxformat: per-statistic numeric formats. A specific
-format takes precedence over the global format; when a specific format is not
-set, the global format is used. meanformat applies to the mean and SD,
-medformat to the median and the IQR (Q1/Q3), and mxformat to the min and max.
-The sum/percentage (sumonly) always use the global format.
+meanformat, medformat, mxformat: per-statistic numeric formats. Precedence for
+each statistic is: the specific option, else the global format() if supplied,
+else a per-statistic default:
+  - meanformat (mean and SD)        -> default "%9.1f"
+  - medformat  (median and IQR)     -> default = the variable's own display
+                                       format (e.g. a %9.0f variable prints its
+                                       median with no decimals)
+  - mxformat   (min and max)        -> default = the variable's own display
+                                       format
+Because the median/min-max defaults follow the variable, they are resolved per
+variable. The sum/percentage (sumonly) use the global format() if supplied,
+else "%9.1f".
 
 Example
 ==========================================
@@ -138,25 +150,29 @@ program quant
 		local medcl =  ")"
 	}
 
-	// Default format setup
-	if ("`format'" == ""){
-	   local format  "%9.1f"
-	}
+	// --- Format resolution ----------------------------------------------------
+	// Precedence for every statistic: the specific option (meanformat/medformat/
+	// mxformat) wins; otherwise the global format() when the user supplied one;
+	// otherwise a per-statistic default:
+	//   mean (+SD)    -> %9.1f
+	//   median (+IQR) -> the variable's own display format
+	//   min / max     -> the variable's own display format
+	//   sum / %       -> %9.1f  (sumonly mode)
+	//
+	// The global `format' is deliberately NOT defaulted to %9.1f here: an empty
+	// `format' is what lets the per-variable median/min-max defaults fire. mean
+	// and the sum format do not depend on the variable, so they are resolved
+	// once. medformat/mxformat may fall back to each variable's display format
+	// (which differs across variables), so they are recomputed per variable
+	// inside the computation loops from the saved originals below.
+	if ("`meanformat'" == "") local meanformat "`format'"
+	if ("`meanformat'" == "") local meanformat "%9.1f"
 
-	// Per-statistic formats. Each takes precedence over the global `format';
-	// when a specific format is not supplied it falls back to the global
-	// `format' (which itself defaults to %9.1f above). meanformat covers the
-	// mean and SD; medformat covers the median and the IQR (Q1/Q3); mxformat
-	// covers the minimum and maximum. The sum/percentage always use `format'.
-	if ("`meanformat'" == ""){
-		local meanformat "`format'"
-	}
-	if ("`medformat'" == ""){
-		local medformat "`format'"
-	}
-	if ("`mxformat'" == ""){
-		local mxformat "`format'"
-	}
+	local sumformat "`format'"
+	if ("`sumformat'" == "") local sumformat "%9.1f"
+
+	local medformat0 "`medformat'"
+	local mxformat0  "`mxformat'"
 	local defaultmode = ("`fullresult'" == "") & ("`medianonly'" == "") & ("`meanonly'" == "") & ("`sumonly'" == "") & ("`verticallayout'" == "")
 	local requires_detail = ("`fullresult'" != "") | ("`medianonly'" != "") | ("`verticallayout'" != "") | `defaultmode'
 
@@ -220,6 +236,14 @@ program quant
 					quietly summarize `v' if `touse' & `by' == `L'
 				}
 
+				// Per-variable median / min-max formats: specific option >
+				// global format() > the variable's own display format.
+				local medformat "`medformat0'"
+				if ("`medformat'" == "") local medformat "`format'"
+				if ("`medformat'" == "") local medformat : format `v'
+				local mxformat "`mxformat0'"
+				if ("`mxformat'" == "") local mxformat "`format'"
+				if ("`mxformat'" == "") local mxformat : format `v'
 
 				local nobs = `r(N)'
 				local emptydb = (`nobs' == 0)
@@ -240,13 +264,13 @@ program quant
 					}
 
 					local grp_sum = `r(sum)'
-					local sm = string(`grp_sum', "`format'")
+					local sm = string(`grp_sum', "`sumformat'")
 
 					if ("`sumonly'" != "") {
 						local totalsm = `totalsum_`v''
-						local allperc = string(0, "`format'")
+						local allperc = string(0, "`sumformat'")
 						if (!missing(`totalsm') & (`totalsm' != 0)) {
-							local allperc = string(100 * `grp_sum' / `totalsm', "`format'")
+							local allperc = string(100 * `grp_sum' / `totalsm', "`sumformat'")
 						}
 					}
 				}
@@ -325,6 +349,16 @@ program quant
 			else {
 				quietly summarize `v' if `touse'
 			}
+
+			// Per-variable median / min-max formats: specific option > global
+			// format() > the variable's own display format.
+			local medformat "`medformat0'"
+			if ("`medformat'" == "") local medformat "`format'"
+			if ("`medformat'" == "") local medformat : format `v'
+			local mxformat "`mxformat0'"
+			if ("`mxformat'" == "") local mxformat "`format'"
+			if ("`mxformat'" == "") local mxformat : format `v'
+
 			local nobs = `r(N)'
 			local emptydb = (`nobs' == 0)
 
@@ -343,13 +377,13 @@ program quant
 				}
 
 				local grp_sum = `r(sum)'
-				local sm = string(`grp_sum', "`format'")
+				local sm = string(`grp_sum', "`sumformat'")
 
 				if ("`sumonly'" != "") {
 					local totalsm = `totalsum_`v''
-					local allperc = string(0, "`format'")
+					local allperc = string(0, "`sumformat'")
 					if (!missing(`totalsm') & (`totalsm' != 0)) {
-						local allperc = string(100 * `grp_sum' / `totalsm', "`format'")
+						local allperc = string(100 * `grp_sum' / `totalsm', "`sumformat'")
 					}
 				}
 			}

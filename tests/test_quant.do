@@ -11,11 +11,15 @@ start_case "quant: minimal, default format"
     eq, expr(`"variable[1] == "price""')  msg("row 1 is price")
     eq, expr(`"variable[2] == "mpg""')    msg("row 2 is mpg")
     eq, expr(`"variable[3] == "weight""') msg("row 3 is weight")
-    substr_in, haystack(`"`=value[1]'"') needle("74")     msg("price row has N=74")
-    substr_in, haystack(`"`=value[1]'"') needle("5006.5") msg("price row has median 5006.5")
-    substr_in, haystack(`"`=value[1]'"') needle("4195.0") msg("price row has p25 4195.0")
-    substr_in, haystack(`"`=value[1]'"') needle("6342.0") msg("price row has p75 6342.0")
-    substr_in, haystack(`"`=value[1]'"') needle("15906")  msg("price row has max 15906")
+    substr_in, haystack(`"`=value[1]'"') needle("74")      msg("price row has N=74")
+    * Default median/min-max now use price's own display format (%8.0gc), so the
+    * values are comma-grouped -- mean (not shown here) would still be %9.1f.
+    substr_in, haystack(`"`=value[1]'"') needle("5,006.5") msg("median in price's %8.0gc format (5,006.5)")
+    substr_in, haystack(`"`=value[1]'"') needle("4,195")   msg("p25 in price's %8.0gc format (4,195)")
+    substr_in, haystack(`"`=value[1]'"') needle("6,342")   msg("p75 in price's %8.0gc format (6,342)")
+    substr_in, haystack(`"`=value[1]'"') needle("15,906")  msg("max in price's %8.0gc format (15,906)")
+    * mpg has a plain %8.0g format (no comma grouping)
+    substr_in, haystack(`"`=value[2]'"') needle("18 ; 25") msg("mpg IQR in mpg's %8.0g format (18 ; 25)")
 end_case
 
 start_case "quant: by(foreign) addtotal, %9.0f -- exact cell contents"
@@ -60,13 +64,14 @@ start_case "quant: verticallayout -- N, mean (SD), median [IQR], (min/max) stack
     quant price, output("`out'") verticallayout
     use "`out'", clear
     eq, expr("_N == 1") msg("1 row")
-    substr_in, haystack(`"`=value[1]'"') needle("74")     msg("vertical has N=74")
-    substr_in, haystack(`"`=value[1]'"') needle("6165.3") msg("vertical has mean 6165.3")
-    substr_in, haystack(`"`=value[1]'"') needle("2949.5") msg("vertical has SD 2949.5")
-    substr_in, haystack(`"`=value[1]'"') needle("5006.5") msg("vertical has median 5006.5")
-    substr_in, haystack(`"`=value[1]'"') needle("4195.0") msg("vertical has p25 4195.0")
-    substr_in, haystack(`"`=value[1]'"') needle("6342.0") msg("vertical has p75 6342.0")
-    substr_in, haystack(`"`=value[1]'"') needle("15906")  msg("vertical has max 15906")
+    substr_in, haystack(`"`=value[1]'"') needle("74")      msg("vertical has N=74")
+    * mean/SD keep the %9.1f default; median/IQR/min-max use price's %8.0gc format
+    substr_in, haystack(`"`=value[1]'"') needle("6165.3")  msg("vertical has mean 6165.3 (%9.1f)")
+    substr_in, haystack(`"`=value[1]'"') needle("2949.5")  msg("vertical has SD 2949.5 (%9.1f)")
+    substr_in, haystack(`"`=value[1]'"') needle("5,006.5") msg("vertical has median 5,006.5 (price's %8.0gc)")
+    substr_in, haystack(`"`=value[1]'"') needle("4,195")   msg("vertical has p25 4,195 (price's %8.0gc)")
+    substr_in, haystack(`"`=value[1]'"') needle("6,342")   msg("vertical has p75 6,342 (price's %8.0gc)")
+    substr_in, haystack(`"`=value[1]'"') needle("15,906")  msg("vertical has max 15,906 (price's %8.0gc)")
     substr_in, haystack(`"`=value[1]'"') needle("\n")     msg("vertical uses \n line breaks between stats")
     eq, expr(`"substr(`"`=value[1]'"', 1, 10) == "VBLANKLINE""') msg("cell leads with the VBLANKLINE sentinel (rendered as a leading blank line)")
 end_case
@@ -79,7 +84,7 @@ start_case "quant: verticallayout noline -- no leading-blank sentinel"
     eq, expr(`"strpos(`"`=value[1]'"', "VBLANKLINE") == 0"') msg("noline omits the VBLANKLINE sentinel")
     eq, expr(`"substr(`"`=value[1]'"', 1, 2) == "74""')      msg("cell starts straight at N under noline")
     substr_in, haystack(`"`=value[1]'"') needle("\n")        msg("noline still stacks stats with \n breaks")
-    substr_in, haystack(`"`=value[1]'"') needle("5006.5")    msg("noline still has median")
+    substr_in, haystack(`"`=value[1]'"') needle("5,006.5")   msg("noline still has median (price's %8.0gc)")
 end_case
 
 start_case "quant: verti abbreviation works"
@@ -119,6 +124,33 @@ start_case "quant: meanformat overrides the default global format"
     use "`out'", clear
     substr_in, haystack(`"`=value[1]'"') needle("6165.257") msg("meanonly mean at meanformat %9.3f")
     substr_in, haystack(`"`=value[1]'"') needle("2949.496") msg("meanonly SD at meanformat %9.3f")
+end_case
+
+start_case "quant: default median/min-max take the variable's own format; mean stays %9.1f"
+    * A controlled variable with a %9.3f display format isolates the new default
+    * (no auto %8.0gc comma noise). median/IQR/min-max should show 3 decimals;
+    * the mean must still use the %9.1f default, not the variable's format.
+    clear
+    set obs 5
+    gen v = _n          // 1..5 -> median 3, p25 2, p75 4, min 1, max 5
+    format v %9.3f
+    tempfile out
+    quant v, output("`out'")
+    use "`out'", clear
+    substr_in, haystack(`"`=value[1]'"') needle("3.000") msg("default median uses v's %9.3f format (3.000)")
+    substr_in, haystack(`"`=value[1]'"') needle("2.000 ; 4.000") msg("default IQR uses v's %9.3f format")
+    substr_in, haystack(`"`=value[1]'"') needle("(1.000 / 5.000)") msg("default min/max use v's %9.3f format")
+
+    * Rebuild v (the output dataset just loaded has no `v', and `value'/`variable'
+    * would make `quant v' an ambiguous abbreviation).
+    clear
+    set obs 5
+    gen v = _n
+    format v %9.3f
+    quant v, output("`out'") meanonly
+    use "`out'", clear
+    substr_in, haystack(`"`=value[1]'"') needle("3.0")           msg("default mean uses the %9.1f default (3.0)")
+    eq, expr(`"strpos(`"`=value[1]'"', "3.000") == 0"')          msg("mean is NOT in the variable's %9.3f format")
 end_case
 
 start_case "quant: idstart() bumps the id column"
