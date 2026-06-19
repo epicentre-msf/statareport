@@ -168,6 +168,28 @@ start_case "quant: a variable's default %9.0g format is reachable (no blank cell
     substr_in, haystack(`"`=value[1]'"') needle("(1.5 / 7.5)") msg("min/max rendered via the variable's %9.0g format")
 end_case
 
+start_case "quant: default restores the leading zero (.5 -> 0.5) for %g-formatted variables"
+    * %g (the default for a gen'd variable) drops the leading zero on sub-1
+    * values (".5"); the median/min-max defaults must restore it ("0.5").
+    clear
+    set obs 5
+    gen frac = _n / 10        // 0.1 .. 0.5 ; %9.0g would print ".1".."0.5"
+    gen negf = (_n - 3) / 10  // -0.2 .. 0.2
+    format frac %9.0g
+    format negf %9.0g
+    tempfile out
+    quant frac negf, output("`out'")
+    use "`out'", clear
+    * frac row: median 0.3, IQR [0.2 ; 0.4], min/max 0.1 / 0.5
+    substr_in, haystack(`"`=value[1]'"') needle("0.3")         msg("median has a leading zero (0.3, not .3)")
+    substr_in, haystack(`"`=value[1]'"') needle("0.2 ; 0.4")  msg("IQR has leading zeros (0.2 ; 0.4)")
+    substr_in, haystack(`"`=value[1]'"') needle("(0.1 / 0.5)") msg("min/max have leading zeros (0.1 / 0.5)")
+    eq, expr(`"strpos(`"`=value[1]'"', "(.") == 0"')           msg("no naked '(.' decimal remains")
+    eq, expr(`"strpos(`"`=value[1]'"', " .") == 0"')           msg("no naked ' .' decimal remains")
+    * negf row: negative sub-1 min keeps its sign and gains a leading zero
+    substr_in, haystack(`"`=value[2]'"') needle("(-0.2 / 0.2)") msg("negative min/max have leading zeros (-0.2 / 0.2)")
+end_case
+
 start_case "quant: idstart() bumps the id column"
     sysuse auto, clear
     tempfile out

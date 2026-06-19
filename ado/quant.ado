@@ -77,6 +77,11 @@ has one, so this is belt-and-suspenders against passing an empty format to
 string(), which would silently blank the cell). The sum/percentage (sumonly)
 use the global format() if supplied, else "%9.1f".
 
+For the median/IQR/min-max values a dropped leading zero is restored: some
+display formats (notably %g, the default for a freshly generated variable)
+print ".5" rather than "0.5", so the formatted value is rewritten to "0.5"
+(and "-.5" to "-0.5"). See quant__leadzero below.
+
 Example
 ==========================================
 
@@ -269,6 +274,13 @@ program quant
 						local p75 =  string(`r(p75)', "`medformat'")
 						local min = string(`r(min)', "`mxformat'")
 						local max = string(`r(max)', "`mxformat'")
+						// Some display formats (e.g. %g) drop the leading 0
+						// (".5" not "0.5"); restore it on the median/IQR/min-max.
+						quant__leadzero med `"`med'"'
+						quant__leadzero p25 `"`p25'"'
+						quant__leadzero p75 `"`p75'"'
+						quant__leadzero min `"`min'"'
+						quant__leadzero max `"`max'"'
 					}
 
 					local grp_sum = `r(sum)'
@@ -385,6 +397,13 @@ program quant
 					local p75 =  string(`r(p75)', "`medformat'")
 					local min = string(`r(min)', "`mxformat'")
 					local max = string(`r(max)', "`mxformat'")
+					// Some display formats (e.g. %g) drop the leading 0
+					// (".5" not "0.5"); restore it on the median/IQR/min-max.
+					quant__leadzero med `"`med'"'
+					quant__leadzero p25 `"`p25'"'
+					quant__leadzero p75 `"`p75'"'
+					quant__leadzero min `"`min'"'
+					quant__leadzero max `"`max'"'
 				}
 
 				local grp_sum = `r(sum)'
@@ -484,4 +503,22 @@ program quant
 		quietly save "`output'", replace
 		display as result "Sucessfully saved file `output'"
 	restore
+end
+
+// Restore the leading zero on a "naked decimal" formatted value: ".5" -> "0.5"
+// and "-.5" -> "-0.5". Some Stata display formats (notably %g, the default for a
+// freshly generated variable) drop the zero before the decimal point, so the
+// per-variable median/min-max defaults can produce values like ".5". Takes the
+// NAME of a caller local and rewrites it in place via c_local; a no-op for
+// values that already have a leading digit (or a leading "0").
+capture program drop quant__leadzero
+program quant__leadzero
+	version 15
+	// `lname' is the NAME of a caller local and `value' its current contents
+	// (locals are not visible across program scopes, so the value is passed in).
+	// Rewrite that caller local in place via c_local.
+	args lname value
+	if (substr(`"`value'"', 1, 1) == ".")        local value = "0" + `"`value'"'
+	else if (substr(`"`value'"', 1, 2) == "-.")   local value = "-0" + substr(`"`value'"', 2, .)
+	c_local `lname' `"`value'"'
 end

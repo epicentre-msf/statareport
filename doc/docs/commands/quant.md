@@ -48,6 +48,9 @@ display is N, median [IQR] (min/max). Alternative layouts are selected with
 stratified by a single categorical variable with `by()` and optionally
 include a total column with `addtotal`.
 
+The median/IQR/min-max values always keep a leading zero: a display format that
+prints `.5` (e.g. `%g`) is rewritten to `0.5` (and `-.5` to `-0.5`).
+
 
 ## Options
 

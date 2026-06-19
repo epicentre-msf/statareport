@@ -45,6 +45,10 @@ line). Output can be
 stratified by a single categorical variable with {opt by()} and optionally
 include a total column with {cmd:addtotal}.
 
+{pstd}The median/IQR/min-max values always keep a leading zero: a display
+format that prints {cmd:.5} (e.g. {cmd:%g}) is rewritten to {cmd:0.5} (and
+{cmd:-.5} to {cmd:-0.5}).
+
 {title:Options}
 {phang}{opt output(string)} specifies the file path for the resulting Stata
 dataset. This option is required.
