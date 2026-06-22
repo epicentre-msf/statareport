@@ -37,10 +37,23 @@ local function endContinuous(format)
   end
 end
 
+-- List of Tables / List of Figures.
+--
+-- These are emitted as Word's native "Table of Figures" field ('TOC \c'),
+-- deliberately NOT wrapped in a <w:sdt> content control. Wrapping them in an
+-- <w:sdt> with docPartGallery "Table of Contents" + docPartUnique -- as a
+-- copy of the real table-of-contents control -- gives the document three
+-- "unique" controls all claiming to be the same gallery item. Some Word
+-- builds then refuse to recalculate the page numbers of the second/third one
+-- (the lists show "1" for every entry and an in-place field refresh does not
+-- fix them), while the genuine table of contents updates fine. A bare field,
+-- exactly what References > Insert Table of Figures produces, updates
+-- reliably. The field code is kept free of leading/trailing whitespace so it
+-- matches the working table-of-contents instruction byte-for-byte.
 local function listoftables(format)
   if format == 'docx' then
-    local pagebreak = '<w:sdt><w:sdtPr><w:docPartObj><w:docPartGallery w:val=\"Table of Contents\" /><w:docPartUnique /></w:docPartObj></w:sdtPr><w:sdtContent><w:p><w:pPr><w:pStyle w:val=\"TOCHeading\" /></w:pPr><w:r><w:t>List Of Tables</w:t></w:r></w:p><w:p><w:r><w:fldChar w:fldCharType=\"begin\" w:dirty=\"true\" /><w:instrText xml:space="preserve"> TOC \\h \\z \\c "Table" </w:instrText><w:fldChar w:fldCharType=\"separate\" /><w:fldChar w:fldCharType=\"end\" /></w:r></w:p></w:sdtContent></w:sdt>'
-    return pandoc.RawBlock('openxml', pagebreak)
+    local lot = '<w:p><w:pPr><w:pStyle w:val=\"TOCHeading\" /></w:pPr><w:r><w:t>List Of Tables</w:t></w:r></w:p><w:p><w:r><w:fldChar w:fldCharType=\"begin\" w:dirty=\"true\" /><w:instrText xml:space=\"preserve\">TOC \\h \\z \\c "Table"</w:instrText><w:fldChar w:fldCharType=\"separate\" /><w:fldChar w:fldCharType=\"end\" /></w:r></w:p>'
+    return pandoc.RawBlock('openxml', lot)
   else
     return pandoc.Para{pandoc.Str '\f'}
   end
@@ -48,8 +61,8 @@ end
 
 local function listoffigures(format)
   if format == 'docx' then
-    local pagebreak = '<w:sdt><w:sdtPr><w:docPartObj><w:docPartGallery w:val=\"Table of Contents\" /><w:docPartUnique /></w:docPartObj></w:sdtPr><w:sdtContent><w:p><w:pPr><w:pStyle w:val=\"TOCHeading\" /></w:pPr><w:r><w:t>List Of Figures</w:t></w:r></w:p><w:p><w:r><w:fldChar w:fldCharType=\"begin\" w:dirty=\"true\" /><w:instrText xml:space="preserve"> TOC \\h \\z \\c "Figure" </w:instrText><w:fldChar w:fldCharType=\"separate\" /><w:fldChar w:fldCharType=\"end\" /></w:r></w:p></w:sdtContent></w:sdt>'
-    return pandoc.RawBlock('openxml', pagebreak)
+    local lof = '<w:p><w:pPr><w:pStyle w:val=\"TOCHeading\" /></w:pPr><w:r><w:t>List Of Figures</w:t></w:r></w:p><w:p><w:r><w:fldChar w:fldCharType=\"begin\" w:dirty=\"true\" /><w:instrText xml:space=\"preserve\">TOC \\h \\z \\c "Figure"</w:instrText><w:fldChar w:fldCharType=\"separate\" /><w:fldChar w:fldCharType=\"end\" /></w:r></w:p>'
+    return pandoc.RawBlock('openxml', lof)
   else
     return pandoc.Para{pandoc.Str '\f'}
   end
