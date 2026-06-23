@@ -21,6 +21,7 @@
 {synopt:{cmdab:output:dir(}{it:string}{cmd:)}}directory for storing generated {cmd:.gph} and PNG files (required; created if missing){p_end}
 {synopt:{cmdab:suf:fix(}{it:string}{cmd:)}}suffix appended to the graph filenames (required){p_end}
 {synopt:{cmdab:conf:igfile(}{it:string}{cmd:)}}Excel file with columns {cmd:parameter}, {cmd:name}, {cmd:units}, {cmd:lln}, {cmd:uln} (required){p_end}
+{synopt:{cmdab:fna:me(}{it:string}{cmd:)}}explicit output filename stem, overriding the default; use it to keep two comparisons that share {opt evalue()} in separate files{p_end}
 {synoptline}
 {p2colreset}{...}
 
@@ -34,7 +35,17 @@ succeeds when {cmd:parameter} equals the measurement variable name or when
 {cmd:name} matches the value supplied in {opt name()}. All options are required.
 
 {pstd}Each graph is saved as both a Stata graph ({cmd:.gph}) and a PNG file
-using the stem {cmd:<parameter>_<evalue>_<suffix>} inside {opt outputdir()}.
+inside {opt outputdir()}. The default filename stem is
+{cmd:<measure>_<evalue>_<suffix>}, where {cmd:<measure>} is the variable named
+on the command line (not the config {cmd:parameter} column). The stem does NOT
+encode {opt basevalue()}: two comparisons that share the same measure,
+{opt evalue()}, and {opt suffix()} but differ in {opt basevalue()} (for example
+baseline-vs-week8 and week4-vs-week8) therefore resolve to the same file, and the
+second call silently overwrites the first. Supply {opt fname()} to set the stem
+explicitly so each comparison keeps its own file. This matters for reports that
+place two shift graphs together: if one file has been overwritten (or never
+written under the expected name), that figure's image is missing at render time
+and only the other graph appears.
 
 {title:Options}
 {phang}{opt evariable(varname)} specifies the numeric variable that identifies
@@ -62,10 +73,28 @@ distinguish different analyses. Required.
 must contain one row per parameter with columns {cmd:parameter}, {cmd:name},
 {cmd:units}, {cmd:lln}, and {cmd:uln}. Required.
 
+{phang}{opt fname(string)} sets the output filename stem explicitly (no
+extension), overriding the default {cmd:<measure>_<evalue>_<suffix>}. Use it when
+two comparisons share the same measure, {opt evalue()}, and {opt suffix()} but
+differ in {opt basevalue()} so they would otherwise overwrite each other -- give
+each its own {opt fname()}. May be abbreviated {cmd:fna}. Optional.
+
+{title:Stored results}
+{pstd}{cmd:compute_shift_graphs} stores the following in {cmd:r()}:{p_end}
+{synoptset 16 tabbed}{...}
+{p2col 5 16 20 2: Macros}{p_end}
+{synopt:{cmd:r(stem)}}the resolved filename stem (without extension){p_end}
+{synopt:{cmd:r(graph)}}full path to the saved {cmd:.gph} file{p_end}
+{synopt:{cmd:r(png)}}full path to the saved {cmd:.png} file{p_end}
+{p2colreset}{...}
+
 {title:Examples}
 {phang}{cmd:. compute_shift_graphs alt, evar(visit) evalue(4) basevalue(0) name("ALT") idvariable(patient_id) outputdir("output_figures") suffix("wk4") configfile("input_md/shift_graphs_inputs.xlsx")}{p_end}
 
 {phang}{cmd:. compute_shift_graphs creatinine if arm==1, evar(visitnum) evalue(8) basevalue(1) name("CREAT") idvariable(subjid) outputdir("output_figures/lab") suffix("wk8_arm1") configfile("config/lab_limits.xlsx")}{p_end}
+
+{phang}{cmd:. compute_shift_graphs alt, evar(visit) evalue(8) basevalue(4) name("ALT") idvariable(patient_id) outputdir("output_figures") suffix("wk8") fname("alt_w4_to_w8") configfile("input_md/shift_graphs_inputs.xlsx")}{p_end}
+{p 8 8 2}(the {cmd:fname()} keeps this week4-vs-week8 graph from overwriting a baseline-vs-week8 graph that shares {cmd:evalue(8)}){p_end}
 
 {title:Also see}
 {pstd}{help create_dyntex}, {help knit}{p_end}

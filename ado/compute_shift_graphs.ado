@@ -9,7 +9,13 @@ Inputs
   friendly name for the shift graph.
 
 The program saves both a Stata graph ({cmd:.gph}) and a PNG using the supplied
-output directory and suffix.
+output directory. The default filename stem is {cmd:<measure>_<evalue>_<suffix>}
+(the variable name, the analysis-visit value, and the suffix); it does NOT
+encode {opt basevalue()}, so two comparisons that differ only in their baseline
+visit would otherwise overwrite each other. Pass {opt fname()} to set the stem
+explicitly and keep each comparison in its own file. The resolved stem and the
+full {cmd:.gph}/{cmd:.png} paths are returned in {cmd:r(stem)}, {cmd:r(graph)},
+and {cmd:r(png)}.
 
 Output sizing
 -------------
@@ -21,7 +27,7 @@ Output sizing
 */
 
 capture program drop compute_shift_graphs
-program define compute_shift_graphs
+program define compute_shift_graphs, rclass
     version 15
     syntax varname(numeric) [if], ///
         EVARiable(varname numeric) ///
@@ -32,7 +38,7 @@ program define compute_shift_graphs
         OUTputdir(string) ///
         SUFfix(string) ///
         CONFigfile(string) ///
-        [ WIDTH(integer 2400) XSize(real 7.5) YSize(real 4.5) ]
+        [ FNAme(string) WIDTH(integer 2400) XSize(real 7.5) YSize(real 4.5) ]
 
     marksample touse, novarlist
     local measure `varlist'
@@ -129,8 +135,23 @@ program define compute_shift_graphs
             xsize(`xsize') ysize(`ysize')
     restore
 
-    graph save "`outputdir'/`measure'_`evalue'_`suffix'", replace
+    * Resolve the output filename stem. By default it encodes the measure and
+    * the analysis-visit value (`evalue'), but NOT `basevalue' -- so two
+    * comparisons that share the same measure/evalue/suffix but differ in
+    * basevalue (e.g. baseline->W8 vs W4->W8) would resolve to the SAME file and
+    * the second graph save/export (both with replace) would silently overwrite
+    * the first. Pass fname() to give a comparison its own filename and avoid the
+    * collision. The resolved stem is returned in r(stem) (and the full paths in
+    * r(graph)/r(png)) so label-sheet/InputID generation can reuse the exact name.
+    local stem "`measure'_`evalue'_`suffix'"
+    if (`"`fname'"' != "") local stem `"`fname'"'
+
+    graph save "`outputdir'/`stem'", replace
     * Only width() is passed so the export height is derived from the
     * xsize()/ysize() aspect ratio above, keeping the PNG undistorted.
-    graph export "`outputdir'/`measure'_`evalue'_`suffix'.png", as(png) width(`width') replace
+    graph export "`outputdir'/`stem'.png", as(png) width(`width') replace
+
+    return local stem  `"`stem'"'
+    return local graph `"`outputdir'/`stem'.gph"'
+    return local png   `"`outputdir'/`stem'.png"'
 end
