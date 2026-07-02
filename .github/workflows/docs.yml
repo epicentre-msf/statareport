@@ -50,10 +50,3 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-        with:
-          # The Pages backend occasionally leaves a deployment sitting in its
-          # queue far longer than the ~40s this small site usually needs. The
-          # action's default 10-minute timeout then aborts the job and CI goes
-          # red even though the build is fine. Give a congested-but-working
-          # queue room to finish (20 min) instead of failing at 10.
-          timeout: 1200000
