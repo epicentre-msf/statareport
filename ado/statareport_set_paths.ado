@@ -10,9 +10,12 @@
 *!
 *! $file_filters is not variant-aware -- the same Lua filter pool is
 *! reused across the main report and any variant (e.g. listings). It
-*! defaults to the three filters shipped by statareport under
+*! defaults to the three mandatory filters shipped by statareport under
 *! <root>/input_md/ (page-orientation.lua, table-breaks.lua,
-*! list-tables.lua) and a warning is printed for each missing file.
+*! list-tables.lua) -- a warning is printed for each missing one -- plus
+*! resize-figures.lua (forces report-figure size). The resize filter uses
+*! the project-local copy when present, else the copy shipped on the
+*! adopath, and is silently skipped only if neither can be found.
 *!
 *! Variants support the "main vs listings" split used in the project
 *! workflow: call the command once with variant("") and again with
@@ -158,6 +161,23 @@ program define statareport_set_paths, rclass
                         "statareport_set_paths: WARNING -- Lua filter missing: `fp'"
                 }
             }
+
+            // resize-figures.lua forces the physical size of report figures so
+            // they don't render full-width. Prefer the project-local (editable)
+            // copy; if this project predates the filter, fall back to the copy
+            // shipped on the adopath so it still applies automatically. Only
+            // append it when it resolves to a real file -- a missing filter
+            // would otherwise abort pandoc, and unlike the three above it is not
+            // considered mandatory.
+            local _fp_resize "`root'/input_md/resize-figures.lua"
+            capture confirm file "`_fp_resize'"
+            if (_rc) {
+                capture findfile resize-figures.lua
+                if (!_rc) local _fp_resize `"`r(fn)'"'
+                else      local _fp_resize ""
+            }
+            if (`"`_fp_resize'"' != "") ///
+                local _filters `"`_filters' "`_fp_resize'""'
         }
         global file_filters `"`_filters'"'
     }

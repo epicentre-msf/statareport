@@ -2,7 +2,7 @@ v 3
 d 'statareport': Custom analysis utilities for your project
 d Author: statareport contributors
 d Requires: Stata 15 or newer
-d Distribution-Date: 20260702
+d Distribution-Date: 20260703
 f ado/statareport__apply_order.ado
 f ado/statareport__read_file.ado
 f ado/statareport__writenone.ado
@@ -22,6 +22,7 @@ f ado/lastexport.ado
 f ressources/list-tables.lua
 f ressources/page-orientation.lua
 f ressources/table-breaks.lua
+f ressources/resize-figures.lua
 f ressources/header.txt
 f ressources/header-listings.txt
 f ressources/default_options.yaml

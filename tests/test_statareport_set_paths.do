@@ -49,6 +49,29 @@ start_case "statareport_set_paths: happy path with all inputs present"
     streq, left(`"${file_graph_opts}"')      right(`"`root'/input_tables/shift_graph_input.xlsx"') msg("file_graph_opts")
 end_case
 
+start_case "statareport_set_paths: resize-figures.lua auto-added to the filter pool"
+    * repo root (strip trailing /tests) to reach the shipped filter.
+    local repo = subinstr("`c(pwd)'", "\", "/", .)
+    if (substr("`repo'", -6, 6) == "/tests") {
+        local repo = substr("`repo'", 1, strlen("`repo'") - 6)
+    }
+
+    _fresh_dir "resize"
+    local root `r(path)'
+    _seed_inputs "`root'" ""
+    * project-local (editable) copy present -> set_paths takes the input_md branch
+    quietly copy "`repo'/ressources/resize-figures.lua" "`root'/input_md/resize-figures.lua", replace
+
+    macro drop file_filters
+    statareport_set_paths, prefix("Proj") root("`root'") quiet
+
+    substr_in, haystack(`"${file_filters}"') needle("resize-figures.lua") ///
+        msg("file_filters includes resize-figures.lua")
+    substr_in, haystack(`"${file_filters}"') ///
+        needle(`"`root'/input_md/resize-figures.lua"') ///
+        msg("resize path points at the project-local copy")
+end_case
+
 start_case "statareport_set_paths: missing input files trigger error 601"
     _fresh_dir "missing"
     local root `r(path)'

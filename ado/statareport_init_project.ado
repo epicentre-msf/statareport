@@ -74,6 +74,7 @@ program define statareport_init_project, rclass
     statareport_init__copy_resource, src("list-tables.lua")     dst("`root'/input_md/list-tables.lua")     overwrite(`overwrite')
     statareport_init__copy_resource, src("page-orientation.lua") dst("`root'/input_md/page-orientation.lua") overwrite(`overwrite')
     statareport_init__copy_resource, src("table-breaks.lua")    dst("`root'/input_md/table-breaks.lua")    overwrite(`overwrite')
+    statareport_init__copy_resource, src("resize-figures.lua")  dst("`root'/input_md/resize-figures.lua")  overwrite(`overwrite')
     statareport_init__copy_resource, src("custom_reference.docx") dst("`root'/input_md/custom_reference.docx") overwrite(`overwrite')
     statareport_init__copy_resource, src("custom_reference-listings.docx") dst("`root'/input_md/custom_reference-listings.docx") overwrite(`overwrite')
     statareport_init__copy_resource, src("default_options.yaml") dst("`root'/input_md/default_options.yaml") overwrite(`overwrite')
@@ -284,9 +285,11 @@ void statareport_init_final(string scalar prefix, string scalar dst)
         "statareport_confirm_data, ignore(local_core)",
         "",
         "* --- 5f. Pandoc Lua filters pulled into this report ------------------------",
-        "* statareport_set_paths auto-initialises $file_filters with the three",
-        "* lua filters shipped under input_md/. Uncomment + edit the line below",
-        "* to override the list (e.g. drop one filter, or add custom filters).",
+        "* statareport_set_paths auto-initialises $file_filters with the four",
+        "* lua filters shipped under input_md/ (page-orientation, table-breaks,",
+        "* list-tables, resize-figures). Edit input_md/resize-figures.lua to change",
+        "* the figure size. Uncomment + edit the line below to override the list",
+        "* (e.g. drop one filter, or add custom filters).",
         "* global file_filters `\"\"$dir_input_md/page-orientation.lua\" \"$dir_input_md/table-breaks.lua\"\"'",
         "",
         "global var_sheet_lab \"Labels\"    // sheet name inside $file_label",
