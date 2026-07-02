@@ -8,7 +8,8 @@ knit using <input.md>, [saving(<output.docx>) replace default(<defaults.yaml>) /
     prepend(<header.txt>) in_header(<preamble.tex>) ///
     filters(<list of lua filters>) ///
     from(<pandoc reader>) to(<pandoc writer>) ///
-    toc(<yes|no>) number_sec(<yes|no>) PANdocloc(<path-to-pandoc>)]
+    toc(<yes|no>) number_sec(<yes|no>) PANdocloc(<path-to-pandoc>) ///
+    caption_label(<word>) list_title(<heading>)]
 
 Behaviour
 ---------
@@ -27,6 +28,12 @@ Behaviour
   (typically Lua filters such as page-orientation.lua).
 - Pandoc is located automatically via `command -v pandoc` (POSIX) or
   `where pandoc` (Windows); explicit override via `pandocloc()`.
+- `caption_label()` / `list_title()` relabel a docx after pandoc runs: every
+  table caption prefix ("Table N") is rewritten to `caption_label()` and the
+  "List Of Tables" heading to `list_title()`. Intended for variant documents
+  (see `statareport_render`, which derives both from `variant()`). The SEQ
+  fields and the list collector are left intact, so numbering and the list keep
+  working; only the visible words change. Figures are not touched.
 */
 
 capture program drop knit
@@ -38,7 +45,8 @@ program knit, rclass
     syntax using/ , [ SAVing(string) REPlace DEFAULT(string) REFERENCE(string) ///
         FIRST(string) PREpend(string) IN_header(string) FILTers(string) ///
         FROM(string) TO(string) ///
-        TOC(string) NUMBER_sec(string) PANdocloc(string) NOFIXsections ]
+        TOC(string) NUMBER_sec(string) PANdocloc(string) NOFIXsections ///
+        CAPTION_label(string) LIST_title(string) ]
 
     confirm file "`using'"
 
@@ -138,6 +146,21 @@ program knit, rclass
         }
     }
 
+    // Post-process docx: relabel table captions and the list-of-tables heading
+    // for variant documents (e.g. "Table 1" -> "Listings 1" and "List Of
+    // Tables" -> "List of Listings"). Driven by statareport_render's variant();
+    // a no-op when neither option is set. The SEQ Table field and the
+    // TOC \c "Table" collector are left untouched, so caption numbering and the
+    // list itself keep working -- only the visible words change. Figures are
+    // deliberately not touched.
+    if (`"`caption_label'"' != "" | `"`list_title'"' != "") {
+        local lc_out = lower(`"`output'"')
+        if (substr(`"`lc_out'"', -5, 5) == ".docx") {
+            knit__relabel_captions, docx(`"`output'"') pandoc(`"`pandoc'"') ///
+                caption_label(`"`caption_label'"') list_title(`"`list_title'"')
+        }
+    }
+
     display as result "✅ --> Rendered `using' to `output'"
 
     return local output        `"`output'"'
@@ -201,6 +224,67 @@ program knit__fix_sections
     capture noisily !"`pandoc'" lua "`script'" "`docx'"
     if (_rc) {
         display as text "knit: note -- could not post-process section headers/footers (rc=`=_rc'); document left as produced by pandoc"
+    }
+end
+
+// Relabel table captions and the list-of-tables heading in a pandoc-generated
+// .docx so a variant document reads in its own vocabulary -- e.g. every
+// "Table 1", "Table 2" caption becomes "Listings 1", "Listings 2" and the
+// "List Of Tables" heading becomes "List of Listings".
+//
+// Only the visible words are rewritten. The underlying "SEQ Table" fields and
+// the "TOC \c "Table"" collector field are left as pandoc/page-orientation.lua
+// wrote them, so caption auto-numbering and the list continue to work; the
+// list simply displays the relabelled caption text. Figures are not touched.
+//
+// caption_label() replaces the caption-prefix word; the non-breaking space
+// pandoc places between the word and the number ("Table N") is preserved.
+// list_title() replaces the exact "List Of Tables" heading emitted by
+// page-orientation.lua. Either may be empty. Like knit__fix_sections this runs
+// through `pandoc lua' (no extra tools) and is a safe no-op when nothing
+// matches.
+capture program drop knit__relabel_captions
+program knit__relabel_captions
+    version 15
+    syntax , DOCX(string) [ PANDOC(string) CAPTION_label(string) LIST_title(string) ]
+
+    if ("`pandoc'" == "") local pandoc "pandoc"
+    if (`"`caption_label'"' == "" & `"`list_title'"' == "") exit 0
+
+    tempfile script
+    tempname fh
+    capture file close `fh'
+    file open `fh' using "`script'", write replace
+    file write `fh' `"local docx  = arg[1]"' _n
+    file write `fh' `"local label = arg[2]"' _n
+    file write `fh' `"local title = arg[3]"' _n
+    file write `fh' `"if not docx then os.exit(0) end"' _n
+    file write `fh' `"local f = io.open(docx, "rb"); if not f then os.exit(0) end"' _n
+    file write `fh' `"local raw = f:read("a"); f:close()"' _n
+    file write `fh' `"local ok, archive = pcall(pandoc.zip.Archive, raw)"' _n
+    file write `fh' `"if not ok or not archive then os.exit(0) end"' _n
+    file write `fh' `"local idx, xml"' _n
+    file write `fh' `"for i, e in ipairs(archive.entries) do"' _n
+    file write `fh' `"  if e.path == "word/document.xml" then idx = i; xml = e:contents() end"' _n
+    file write `fh' `"end"' _n
+    file write `fh' `"if not xml then os.exit(0) end"' _n
+    file write `fh' `"local NBSP = "\194\160""' _n
+    file write `fh' `"local n1, n2 = 0, 0"' _n
+    file write `fh' `"if label and label ~= "" then"' _n
+    file write `fh' `"  xml, n1 = xml:gsub([[(<w:t[^>]*>)[^<]-(</w:t></w:r><w:fldSimple w:instr="SEQ Table)]], function(a, b) return a .. label .. NBSP .. b end)"' _n
+    file write `fh' `"end"' _n
+    file write `fh' `"if title and title ~= "" then"' _n
+    file write `fh' `"  xml, n2 = xml:gsub([[(<w:t>)List Of Tables(</w:t>)]], function(a, b) return a .. title .. b end)"' _n
+    file write `fh' `"end"' _n
+    file write `fh' `"if (n1 + n2) == 0 then os.exit(0) end"' _n
+    file write `fh' `"archive.entries[idx] = pandoc.zip.Entry("word/document.xml", xml)"' _n
+    file write `fh' `"local wf = io.open(docx, "wb"); wf:write(archive:bytestring()); wf:close()"' _n
+    file write `fh' `"io.stderr:write("statareport: relabelled " .. n1 .. " caption(s), " .. n2 .. " heading(s)\n")"' _n
+    file close `fh'
+
+    capture noisily !"`pandoc'" lua "`script'" "`docx'" "`caption_label'" "`list_title'"
+    if (_rc) {
+        display as text "knit: note -- could not relabel captions (rc=`=_rc'); document left as produced by pandoc"
     }
 end
 

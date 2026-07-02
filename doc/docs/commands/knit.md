@@ -41,6 +41,8 @@
 - **`number_s`**`ec(`*string*`)` — section numbering toggle (`yes` (default) or `no`)
 - **`pan`**`docloc(`*string*`)` — explicit path to the Pandoc executable
 - **`nofix`**`sections` — do not propagate header/footer references into orientation section breaks
+- **`caption_l`**`abel(`*word*`)` — rewrite every `Table N` caption prefix to *word*
+- **`list_t`**`itle(`*heading*`)` — rewrite the `List Of Tables` heading to *heading*
 
 ---
 
@@ -126,6 +128,18 @@ header/footer reference and Word drops the footer and page numbering on every
 section but the last. The step uses `pandoc lua` (no extra dependency), is a
 no-op when there is nothing to copy (e.g. no reference document, or one without
 a footer), and is safe to re-run.
+
+> `caption_label(`*word*`)` and `list_title(`*heading*`)` relabel the finished
+`.docx` for variant documents. `caption_label()` rewrites every table caption
+prefix (`Table 1`, `Table 2`, …) to *word* — preserving the non-breaking space
+pandoc puts before the number — and `list_title()` rewrites the `List Of Tables`
+heading emitted by `page-orientation.lua` to *heading*. The underlying
+`SEQ Table` fields and the `TOC \c "Table"` collector are left intact, so caption
+numbering and the list keep working; only the visible words change, and figures
+are not touched. Like the section-break fix this uses `pandoc lua` (no extra
+dependency) and is a no-op when nothing matches.
+[`statareport_render`](statareport_render.md) derives both strings from
+`variant()`.
 
 
 ## Examples

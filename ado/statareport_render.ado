@@ -24,8 +24,20 @@
 *!     $<global>_<variant>    when variant() is non-empty >
 *!     $<global>
 *!
+*! Variant relabeling:
+*!     When variant(s) is set the finished document is relabelled into the
+*!     variant's own vocabulary: every "Table N" caption becomes "<S> N" and the
+*!     "List of Tables" heading becomes "List of <S>" (S = variant, title-cased),
+*!     so variant("listings") yields "Listings 1: ..." captions and a
+*!     "List of Listings" at the top. Table numbering and the list itself are
+*!     unchanged (only the visible words differ); figures keep saying "Figure".
+*!     caption_label()/list_title() override the two strings; norelabel disables it.
+*!
 *! Options:
 *!     variant(s)       read $<global>_<s> instead of $<global> (e.g. "listings")
+*!     caption_label(w) word that replaces "Table" in captions (default: proper(s))
+*!     list_title(t)    heading that replaces "List of Tables" (default: List of proper(s))
+*!     norelabel        disable the variant caption/list relabeling
 *!     label(...)       override $file_label
 *!     dyntex(...)      override $file_dyntex
 *!     input(...)       override $file_input
@@ -59,6 +71,7 @@ program define statareport_render, rclass
         DEFAULT(string) FIRST(string) IN_header(string) PANdocloc(string) ///
         SHEET(string) TAB_dir(string) FIG_dir(string) NBINput(integer -1) ///
         TOC(string) NUMBER_sec(string) FROM(string) TO(string) ///
+        CAPTION_label(string) LIST_title(string) NORELabel ///
         SKIP_dyntex SKIP_dyntext SKIP_knit ///
         QUIet ]
 
@@ -99,6 +112,23 @@ program define statareport_render, rclass
 
     local _tab_dir   = cond(`"`tab_dir'"'   != "", `"`tab_dir'"',   `"${dir_lbltables}"')
     local _fig_dir   = cond(`"`fig_dir'"'   != "", `"`fig_dir'"',   `"${dir_figures}"')
+
+    // -------------------------------------------------------------------
+    // Variant relabeling. In a variant document the table captions and the
+    // list-of-tables heading are rewritten to the variant's own vocabulary,
+    // so e.g. variant("listings") yields "Listings 1: ..." captions and a
+    // "List of Listings" at the top instead of "Table"/"List of Tables".
+    // Both strings default to the variant name (title-cased) but can be set
+    // explicitly with caption_label()/list_title(); norelabel turns the whole
+    // thing off. Figures are left as "Figure"/"List of Figures". knit does the
+    // actual rewrite on the finished docx (see knit's caption_label()).
+    // -------------------------------------------------------------------
+    local _caplabel  `"`caption_label'"'
+    local _listtitle `"`list_title'"'
+    if ("`norelabel'" == "" & "`v'" != "") {
+        if (`"`_caplabel'"'  == "") local _caplabel  = proper("`v'")
+        if (`"`_listtitle'"' == "") local _listtitle = "List of " + proper("`v'")
+    }
 
     // -------------------------------------------------------------------
     // Validate the minimal set of paths needed for each stage.
@@ -164,6 +194,8 @@ program define statareport_render, rclass
         if (`"`number_sec'"' != "") local knit_opts `"`knit_opts' number_sec(`"`number_sec'"')"'
         if (`"`from'"'       != "") local knit_opts `"`knit_opts' from(`"`from'"')"'
         if (`"`to'"'         != "") local knit_opts `"`knit_opts' to(`"`to'"')"'
+        if (`"`_caplabel'"'  != "") local knit_opts `"`knit_opts' caption_label(`"`_caplabel'"')"'
+        if (`"`_listtitle'"' != "") local knit_opts `"`knit_opts' list_title(`"`_listtitle'"')"'
 
         knit using `"`_input'"', saving(`"`_output'"') replace `knit_opts'
     }
@@ -179,6 +211,8 @@ program define statareport_render, rclass
     return local first     `"`_first'"'
     return local in_header `"`_inhdr'"'
     return local pandocloc `"`_pandoc'"'
+    return local caption_label `"`_caplabel'"'
+    return local list_title    `"`_listtitle'"'
 end
 
 capture program drop exit_error

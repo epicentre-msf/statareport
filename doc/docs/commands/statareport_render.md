@@ -35,6 +35,9 @@
 - **`num`**`ber_sec(`*yes|no*`)` — forwarded to [`knit`](knit.md) (default yes)
 - `from(`*str*`)` — pandoc reader override
 - `to(`*str*`)` — pandoc writer override
+- **`caption_l`**`abel(`*w*`)` — word that replaces `Table` in captions (default `proper(`*s*`)`)
+- **`list_t`**`itle(`*t*`)` — heading that replaces `List of Tables` (default `List of proper(`*s*`)`)
+- **`norel`**`abel` — disable the variant caption/list relabeling
 - `skip_dyntex` — skip stage 1 (use existing `$file_dyntex`)
 - `skip_dyntext` — skip stage 2 (use existing `$file_input`)
 - `skip_knit` — skip stage 3 (stop after the Markdown is written)
@@ -59,13 +62,30 @@ For the listings variant the command reads `$file_*_listings` instead
 of `$file_*`.
 
 
+## Variant relabeling
+
+When `variant(`*s*`)` is set the finished document is relabeled into the
+variant's own vocabulary: every `Table N` caption becomes `*S* N` and the
+`List of Tables` heading becomes `List of *S*` (*S* title-cased). So
+`variant("listings")` yields `Listings 1: ...` captions and a
+`List of Listings` at the top instead of `Table`/`List of Tables`. Table
+numbering and the list itself are unchanged — only the visible words differ —
+and figures keep saying `Figure`. Set `caption_label()` and/or `list_title()`
+to choose the two strings explicitly, or `norelabel` to leave the document
+exactly as pandoc produced it. The rewrite is done by [`knit`](knit.md) on the
+rendered `.docx` (see knit's `caption_label()`).
+
+
 ## Examples
 
 Render the main report:
 > `. statareport_render`
 
-Render the listings variant, no table of contents:
+Render the listings variant (captions become `Listings N`, with a `List of Listings` at the top), no table of contents:
 > `. statareport_render, variant("listings") toc(no)`
+
+Same, but keep pandoc's `Table`/`List of Tables` wording:
+> `. statareport_render, variant("listings") toc(no) norelabel`
 
 Override a single path (custom label sheet name):
 > `. statareport_render, sheet("Labels_v2")`
@@ -78,7 +98,8 @@ Iterate on the Markdown only, no knit:
 
 `r(label)`, `r(dyntex)`, `r(input)`, `r(output)`,
 `r(reference)`, `r(header)`, `r(filters)`: the resolved paths
-actually used this call.
+actually used this call. `r(caption_label)`, `r(list_title)`: the relabeling
+strings applied (empty when `norelabel` or no variant).
 
 
 ## Also see

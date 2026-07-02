@@ -37,6 +37,8 @@
 {synopt:{cmdab:number_s:ec(}{it:string}{cmd:)}}section numbering toggle ({cmd:yes} (default) or {cmd:no}){p_end}
 {synopt:{cmdab:pan:docloc(}{it:string}{cmd:)}}explicit path to the Pandoc executable{p_end}
 {synopt:{cmdab:nofix:sections}}do not propagate header/footer references into orientation section breaks{p_end}
+{synopt:{cmdab:caption_l:abel(}{it:word}{cmd:)}}rewrite every {cmd:Table N} caption prefix to {it:word}{p_end}
+{synopt:{cmdab:list_t:itle(}{it:heading}{cmd:)}}rewrite the {cmd:List Of Tables} heading to {it:heading}{p_end}
 {synoptline}
 {p2colreset}{...}
 
@@ -117,6 +119,18 @@ sections with no header/footer reference and Word drops the footer and page
 numbering on every section but the last. The step uses {cmd:pandoc lua} (no
 extra dependency), is a no-op when there is nothing to copy (e.g. no reference
 document, or a reference document without a footer), and is safe to re-run.
+
+{phang}{cmd:caption_label(}{it:word}{cmd:)} and {cmd:list_title(}{it:heading}{cmd:)}
+relabel the finished {cmd:.docx} for variant documents. {cmd:caption_label()}
+rewrites every table caption prefix ({cmd:Table 1}, {cmd:Table 2}, ...) to
+{it:word} -- preserving the non-breaking space pandoc puts before the number --
+and {cmd:list_title()} rewrites the {cmd:List Of Tables} heading emitted by
+{help create_dyntex:page-orientation.lua} to {it:heading}. The underlying
+{cmd:SEQ Table} fields and the {cmd:TOC \c "Table"} collector are left intact,
+so caption numbering and the list keep working; only the visible words change,
+and figures are not touched. Like the section-break fix this uses
+{cmd:pandoc lua} (no extra dependency) and is a no-op when nothing matches.
+{help statareport_render} derives both strings from {cmd:variant()}.
 
 {title:Examples}
 {phang}{cmd:. knit using "output_md/report.md", replace}{p_end}

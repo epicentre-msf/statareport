@@ -31,6 +31,9 @@
 {synopt:{cmdab:num:ber_sec(}{it:yes|no}{cmd:)}}forwarded to {help knit} (default yes){p_end}
 {synopt:{cmd:from(}{it:str}{cmd:)}}pandoc reader override{p_end}
 {synopt:{cmd:to(}{it:str}{cmd:)}}pandoc writer override{p_end}
+{synopt:{cmdab:caption_l:abel(}{it:w}{cmd:)}}word that replaces {cmd:Table} in captions (default {cmd:proper(}{it:s}{cmd:)}){p_end}
+{synopt:{cmdab:list_t:itle(}{it:t}{cmd:)}}heading that replaces {cmd:List of Tables} (default {cmd:List of proper(}{it:s}{cmd:)}){p_end}
+{synopt:{cmdab:norel:abel}}disable the variant caption/list relabeling{p_end}
 {synopt:{cmd:skip_dyntex}}skip stage 1 (use existing {cmd:$file_dyntex}){p_end}
 {synopt:{cmd:skip_dyntext}}skip stage 2 (use existing {cmd:$file_input}){p_end}
 {synopt:{cmd:skip_knit}}skip stage 3 (stop after the Markdown is written){p_end}
@@ -51,12 +54,30 @@ overridden falls back to the variant-aware global, then the plain global.
 For the listings variant the command reads {cmd:$file_*_listings} instead
 of {cmd:$file_*}.{p_end}
 
+{title:Variant relabeling}
+{pstd}When {cmd:variant(}{it:s}{cmd:)} is set the finished document is
+relabeled into the variant's own vocabulary: every {cmd:Table N} caption
+becomes {cmd:{it:S} N} and the {cmd:List of Tables} heading becomes
+{cmd:List of {it:S}} ({it:S} title-cased). So {cmd:variant("listings")}
+yields {cmd:Listings 1: ...} captions and a {cmd:List of Listings} at the
+top instead of {cmd:Table}/{cmd:List of Tables}. Table numbering and the
+list itself are unchanged -- only the visible words differ -- and figures
+keep saying {cmd:Figure}. Set {cmd:caption_label()} and/or
+{cmd:list_title()} to choose the two strings explicitly, or {cmd:norelabel}
+to leave the document exactly as pandoc produced it. The rewrite is done by
+{help knit} on the rendered {cmd:.docx} (see {help knit}'s
+{cmd:caption_label()}).{p_end}
+
 {title:Examples}
 {pstd}Render the main report:{p_end}
 {phang}{cmd:. statareport_render}{p_end}
 
-{pstd}Render the listings variant, no table of contents:{p_end}
+{pstd}Render the listings variant (captions become {cmd:Listings N}, with a
+{cmd:List of Listings} at the top), no table of contents:{p_end}
 {phang}{cmd:. statareport_render, variant("listings") toc(no)}{p_end}
+
+{pstd}Same, but keep pandoc's {cmd:Table}/{cmd:List of Tables} wording:{p_end}
+{phang}{cmd:. statareport_render, variant("listings") toc(no) norelabel}{p_end}
 
 {pstd}Override a single path (custom label sheet name):{p_end}
 {phang}{cmd:. statareport_render, sheet("Labels_v2")}{p_end}
@@ -67,7 +88,8 @@ of {cmd:$file_*}.{p_end}
 {title:Stored results}
 {pstd}{cmd:r(label)}, {cmd:r(dyntex)}, {cmd:r(input)}, {cmd:r(output)},
 {cmd:r(reference)}, {cmd:r(header)}, {cmd:r(filters)}: the resolved paths
-actually used this call.{p_end}
+actually used this call. {cmd:r(caption_label)}, {cmd:r(list_title)}: the
+relabeling strings applied (empty when {cmd:norelabel} or no variant).{p_end}
 
 {title:Also see}
 {pstd}{help create_dyntex}, {help knit}, {help statareport_set_paths}, {help statareport_write_header}{p_end}
